@@ -28,6 +28,19 @@ enum PaidVia {
   CASH
 }
 
+enum HomeworkSubStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ExamAnswer {
+  variantA
+  variantB
+  variantC
+  variantD
+}
+
 model Users {
   id        Int      @id @default(autoincrement())
   phone     String
@@ -37,13 +50,17 @@ model Users {
   image     String?
   createdAt DateTime @default(now())
 
-  mentorProfile    MentorProfile[]
-  courses          Course[]
-  assignedCourses  AssignedCourse[]
-  purchasedCourses PurchasedCourse[]
-  rating           Rating[]
-  lastActivity     LastActivity[]
-  lessonView       LessonView[]
+  mentorProfile      MentorProfile[]
+  courses            Course[]
+  assignedCourses    AssignedCourse[]
+  purchasedCourses   PurchasedCourse[]
+  rating             Rating[]
+  lastActivity       LastActivity[]
+  lessonView         LessonView[]
+  homeworkSubmission HomeworkSubmission[]
+  examResult         ExamResult[]
+  question           Question[]
+  questionAnswer     QuestionAnswer[]
 }
 
 model MentorProfile {
@@ -92,6 +109,7 @@ model Course {
   rating           Rating[]
   lastActivity     LastActivity[]
   LessonGroup      LessonGroup[]
+  question         Question[]
 }
 
 model AssignedCourse {
@@ -154,6 +172,8 @@ model LessonGroup {
   courses      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lastActivity LastActivity[]
   lessons      Lesson[]
+  exam         Exam[]
+  examResult   ExamResult[]
 }
 
 model Lesson {
@@ -197,6 +217,78 @@ model Homework {
   updatedAt DateTime?
   createdAt DateTime  @default(now())
 
-  lessons Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessons            Lesson               @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  homeworkSubmission HomeworkSubmission[]
 }
 
+model HomeworkSubmission {
+  id         Int               @id @default(autoincrement())
+  text       String?
+  file       String
+  reason     String?
+  status     HomeworkSubStatus @default(PENDING)
+  homeworkId Int
+  userId     Int
+  updatedAt  DateTime?
+  createdAt  DateTime          @default(now())
+
+  homeworks Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  users     Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Exam {
+  id            Int        @id @default(autoincrement())
+  question      String
+  variantA      String
+  variantB      String
+  variantC      String
+  variantD      String
+  answer        ExamAnswer
+  lessonGroupId Int
+  createdAt     DateTime   @default(now())
+
+  lessonGroup LessonGroup @relation(fields: [lessonGroupId], references: [id], onDelete: Cascade)
+}
+
+model ExamResult {
+  id            Int      @id @default(autoincrement())
+  lessonGroupId Int
+  userId        Int
+  passed        Boolean
+  corrects      Int
+  wrongs        Int
+  createdAt     DateTime @default(now())
+
+  lessonGroup LessonGroup @relation(fields: [lessonGroupId], references: [id], onDelete: Cascade)
+  users       Users       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Question {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  courseId  String
+  text      String
+  file      String?
+  read      Boolean   @default(false)
+  readAt    DateTime?
+  updatedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  users          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courses        Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questionAnswer QuestionAnswer[]
+}
+
+model QuestionAnswer {
+  id         Int     @id @default(autoincrement())
+  questionId Int     @unique
+  userId     Int
+  text       String
+  file       String?
+
+  updatedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  questions Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  users     Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
