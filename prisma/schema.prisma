@@ -1,0 +1,202 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MENTOR
+  ASSISTANT
+  STUDENT
+}
+
+enum CourseLevel {
+  BEGINNER
+  PRE_INTERMEDIATE
+  INTERMEDIATE
+  UPPER_INTERMEDIATE
+  ADVANCED
+}
+
+enum PaidVia {
+  PAYME
+  CLICK
+  CASH
+}
+
+model Users {
+  id        Int      @id @default(autoincrement())
+  phone     String
+  password  String
+  role      UserRole @default(STUDENT)
+  fullName  String
+  image     String?
+  createdAt DateTime @default(now())
+
+  mentorProfile    MentorProfile[]
+  courses          Course[]
+  assignedCourses  AssignedCourse[]
+  purchasedCourses PurchasedCourse[]
+  rating           Rating[]
+  lastActivity     LastActivity[]
+  lessonView       LessonView[]
+}
+
+model MentorProfile {
+  id         Int     @id @default(autoincrement())
+  about      String?
+  job        String?
+  experience Int
+  telegram   String?
+  instagram  String?
+  linkedin   String?
+  facebook   String?
+  github     String?
+  website    String?
+
+  user_id Int   @unique
+  users   Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model CourseCategory {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+
+  courses Course[]
+}
+
+model Course {
+  id         String      @id @default(uuid())
+  name       String
+  about      String
+  price      Decimal
+  banner     String
+  introVideo String?
+  level      CourseLevel
+  published  Boolean     @default(false)
+  updatedAt  DateTime?
+  createdAt  DateTime    @default(now())
+
+  categoryId Int
+  mentorId   Int
+
+  category         CourseCategory    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  mentor           Users             @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+  assignedCourses  AssignedCourse[]
+  purchasedCourses PurchasedCourse[]
+  rating           Rating[]
+  lastActivity     LastActivity[]
+  LessonGroup      LessonGroup[]
+}
+
+model AssignedCourse {
+  userId    Int
+  courseId  String
+  createdAt DateTime @default(now())
+
+  users   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courses Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@id([userId, courseId])
+}
+
+model PurchasedCourse {
+  courseId    String
+  userId      Int
+  amount      Decimal? @db.Decimal
+  paidVia     PaidVia
+  purchasedAt DateTime @default(now())
+
+  courses Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  users   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, userId])
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  rate      Int
+  comment   String
+  courseId  String
+  userId    Int
+  createdAt DateTime @default(now())
+
+  courses Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  users   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LastActivity {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  courseId  String?
+  groupId   Int?
+  lessonId  String?
+  url       String?
+  createdAt DateTime @default(now())
+
+  courses      Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  users        Users        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonGroups LessonGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  lessons      Lesson?      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model LessonGroup {
+  id        Int      @id @default(autoincrement())
+  name      String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  courses      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lastActivity LastActivity[]
+  lessons      Lesson[]
+}
+
+model Lesson {
+  id      String @id @default(uuid())
+  name    String
+  about   String
+  video   String
+  groupId Int
+
+  groups       LessonGroup    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  lastActivity LastActivity[]
+  lessonView   LessonView[]
+  lessonFile   LessonFile[]
+  homework     Homework[]
+}
+
+model LessonView {
+  lessonId String  @id @default(uuid())
+  userId   Int
+  view     Boolean
+
+  lessons Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  users   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LessonFile {
+  id        Int      @id @default(autoincrement())
+  file      String
+  note      String?
+  lessonId  String
+  createdAt DateTime @default(now())
+
+  lessons Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model Homework {
+  id        Int       @id @default(autoincrement())
+  task      String
+  file      String?
+  lessonId  String
+  updatedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  lessons Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
