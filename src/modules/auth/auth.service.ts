@@ -7,6 +7,7 @@ import { RegisterDto } from './interfaces/register.dto';
 import { VerifyDto } from './interfaces/verifydto';
 import * as bcrypt from "bcrypt"
 import { LoginDto } from './interfaces/loginDto';
+import { VerificationService } from '../verification/verification.service';
 
 interface JwtPayload {
     id: number,
@@ -16,7 +17,7 @@ interface JwtPayload {
 @Injectable()
 export class AuthService {
 
-    constructor(private prismaService: PrismaService, private redisService: RedisService, private jwtService: JwtService) { }
+    constructor(private prismaService: PrismaService, private redisService: RedisService, private jwtService: JwtService, private verifiacationService: VerificationService) { }
 
 
     private async generateToken(payload: JwtPayload, accessTokenOnly = false) {
@@ -39,7 +40,7 @@ export class AuthService {
         let phone = await this.prismaService.users.findFirst({ where: { phone: payload.phone } })
         if (phone) throw new ConflictException(`${payload.phone} is already exists!`)
 
-
+         
         // await this.redisService.set(`register:${payload.phone}`, JSON.stringify({ ...payload, code }), 600)
 
         return {

@@ -30,7 +30,7 @@ export class AuthController {
         return this.authService.register(payload)
     }
 
-    @ApiOperation({ summary: "Foydalanuvchini Emaildagi code bilan tasdiqlash" })
+    @ApiOperation({ summary: "Foydalanuvchini Otp code bilan tasdiqlash" })
     @ApiResponse({ status: 200, description: 'Success' })
     @ApiResponse({ status: 404, description: 'UnSuccess' })
     @Post('verify')

@@ -43,7 +43,7 @@ enum ExamAnswer {
 
 model Users {
   id        Int      @id @default(autoincrement())
-  phone     String
+  phone     String   @unique
   password  String
   role      UserRole @default(STUDENT)
   fullName  String

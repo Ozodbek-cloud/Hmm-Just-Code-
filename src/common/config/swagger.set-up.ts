@@ -6,7 +6,6 @@ export function setupSwagger(app: INestApplication): void {
     .setTitle('Learning Management Platform')
     .setDescription('The Learning API description')
     .setVersion('1.0')
-    .addTag('Learning')
     .addBearerAuth()
     .build();
 

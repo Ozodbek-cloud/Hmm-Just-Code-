@@ -7,6 +7,7 @@ export class RedisService implements OnModuleInit {
 
   async onModuleInit() {
     const redisUrl = process.env.REDIS_URL;
+    console.log('🚀 Redis connected')
     if (!redisUrl) {
       throw new Error('REDIS_URL is not defined in .env');
     }
