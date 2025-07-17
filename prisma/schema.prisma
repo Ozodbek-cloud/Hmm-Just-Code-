@@ -67,7 +67,7 @@ model MentorProfile {
   id         Int     @id @default(autoincrement())
   about      String?
   job        String?
-  experience Int
+  experience Int?
   telegram   String?
   instagram  String?
   linkedin   String?

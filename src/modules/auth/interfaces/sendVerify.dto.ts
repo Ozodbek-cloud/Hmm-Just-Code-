@@ -1,13 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString } from "class-validator";
 
-export class VerifyDto {
-
+export class SendVerifyDto {
     @ApiProperty({
-        example: '12345',
-        description: 'Otp  Code',
+        example: '+998948855888',
+        description: 'Telephone Number',
     })
     @IsString()
+    @IsPhoneNumber()
     @IsNotEmpty()
-    otp_code: string;
+    phone: string;
 }

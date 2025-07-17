@@ -31,7 +31,7 @@ CREATE TABLE "MentorProfile" (
     "id" SERIAL NOT NULL,
     "about" TEXT,
     "job" TEXT,
-    "experience" INTEGER NOT NULL,
+    "experience" INTEGER,
     "telegram" TEXT,
     "instagram" TEXT,
     "linkedin" TEXT,
