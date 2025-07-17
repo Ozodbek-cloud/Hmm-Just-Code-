@@ -5,9 +5,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from 'src/core/prisma/prisma.module';
 import { RedisModule } from 'src/common/redis/redis.module';
 import { VerificationModule } from '../verification/verification.module';
+import { MentorProfilesModule } from '../mentor-profiles/mentor-profiles.module';
 
 @Module({
-  imports: [JwtModule, PrismaModule, RedisModule, VerificationModule],
+  imports: [JwtModule, PrismaModule, RedisModule, VerificationModule, MentorProfilesModule],
   providers: [AuthService],
   controllers: [AuthController]
 })

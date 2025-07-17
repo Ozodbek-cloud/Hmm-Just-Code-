@@ -1,4 +1,54 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Req, UnsupportedMediaTypeException, UseInterceptors } from '@nestjs/common';
+import { MentorProfilesService } from './mentor-profiles.service';
+import { Update_Mentor_ProfileDto } from './interfaces/update-mentor';
+import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiResponse, ApiConsumes } from '@nestjs/swagger';
 
+
+@ApiTags('Mentor Profiles')
 @Controller('mentor-profiles')
-export class MentorProfilesController {}
+export class MentorProfilesController {
+    constructor(private readonly mentorService: MentorProfilesService) { }
+
+    @Patch(':id/update/mentor')
+    @ApiOperation({ summary: 'Update a Mentor profile' })
+    @ApiConsumes('multipart/form-data')
+    @ApiParam({ name: 'id', type: Number, description: 'Mentor profile Id', example: 1 })
+    @ApiResponse({ status: 200, description: 'Mentor profile updated successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request or validation error' })
+    @ApiResponse({ status: 404, description: 'Mentor not found' })
+    async Updated(@Req() req: Request, @Body() payload: Update_Mentor_ProfileDto, image: Express.Multer.File) {
+        return this.mentorService.update(req['Mentor'].id, payload);
+    }
+
+    @Get(':id/mentor')
+    @ApiOperation({ summary: 'Get One Mentor Profile' })
+    @ApiParam({ name: 'id', type: Number, description: 'Mentor profile Id', example: 1 })
+    @ApiResponse({ status: 200, description: 'Mentor profile getted successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request or validation error' })
+    @ApiResponse({ status: 404, description: 'Mentor not found' })
+    Get_One(@Param('id') id: number) {
+        return this.mentorService.get_one_by_id(+id);
+    }
+
+    @Get(':job/mentor')
+    @ApiOperation({ summary: 'Get By Job Mentor Profile' })
+    @ApiParam({ name: 'job', type: String, description: 'Mentor profile Job', example: 'Policer' })
+    @ApiResponse({ status: 200, description: 'Mentor profile Getted successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request or validation error' })
+    @ApiResponse({ status: 404, description: 'Mentor not found' })
+    Get_By_Job(@Param('job') job: string) {
+        return this.mentorService.get_one_by_job(job);
+    }
+
+    @Get(':year/mentor')
+    @ApiOperation({ summary: 'Get By Experience Year Mentor Profile' })
+    @ApiParam({ name: 'year', type: Number, description: 'Mentor profile Experience Year', example: 5 })
+    @ApiResponse({ status: 200, description: 'Mentor profile Getted successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request or validation error' })
+    @ApiResponse({ status: 404, description: 'Mentor not found' })
+    Get_By_Experience(@Param('year') year: number) {
+        return this.mentorService.get_one_by_experience(year);
+    }
+
+
+}

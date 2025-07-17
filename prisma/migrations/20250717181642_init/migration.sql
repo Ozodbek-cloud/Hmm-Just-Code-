@@ -18,9 +18,9 @@ CREATE TABLE "Users" (
     "id" SERIAL NOT NULL,
     "phone" TEXT NOT NULL,
     "password" TEXT NOT NULL,
+    "image" TEXT,
     "role" "UserRole" NOT NULL DEFAULT 'STUDENT',
     "fullName" TEXT NOT NULL,
-    "image" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Users_pkey" PRIMARY KEY ("id")
@@ -238,6 +238,9 @@ CREATE TABLE "QuestionAnswer" (
 
     CONSTRAINT "QuestionAnswer_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Users_phone_key" ON "Users"("phone");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "MentorProfile_user_id_key" ON "MentorProfile"("user_id");

@@ -12,6 +12,14 @@ export class RegisterDto {
   phone: string;
 
   @ApiProperty({
+    example: '00000',
+    description: 'Otp Code',
+  })
+  @IsString()
+  @IsNotEmpty()
+  otp_code: string
+
+  @ApiProperty({
     example: 'NoName',
     description: 'Full Name',
   })

@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
-export class Mentor_ProfileDto {
+export class Update_Mentor_ProfileDto {
     @ApiProperty({ example: "Software engineer with 5+ years of experience", description: "Short bio or about section" })
     @IsString()
     @IsOptional()
@@ -13,6 +13,12 @@ export class Mentor_ProfileDto {
     @IsOptional()
     @IsNotEmpty()
     job: string;
+
+    @ApiProperty({ example: "example.png", description: "Mentors Image", format: 'binary'})
+    @IsString()
+    @IsOptional()
+    @IsNotEmpty()
+    image: string;
 
     @ApiProperty({ example: 5, description: "Years of experience" })
     @IsNumber()
@@ -56,4 +62,5 @@ export class Mentor_ProfileDto {
     @IsOptional()
     website: string
 
+    
 }

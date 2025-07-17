@@ -45,9 +45,9 @@ model Users {
   id        Int      @id @default(autoincrement())
   phone     String   @unique
   password  String
+  image      String?
   role      UserRole @default(STUDENT)
   fullName  String
-  image     String?
   createdAt DateTime @default(now())
 
   mentorProfile      MentorProfile[]
@@ -76,6 +76,7 @@ model MentorProfile {
   website    String?
 
   user_id Int   @unique
+
   users   Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
@@ -274,8 +275,8 @@ model Question {
   updatedAt DateTime?
   createdAt DateTime  @default(now())
 
-  users          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  courses        Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  users          Users            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courses        Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   questionAnswer QuestionAnswer[]
 }
 

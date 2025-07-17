@@ -3,7 +3,6 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { VerificationService } from './verification.service';
 import { EverificationTypes } from 'src/common/types/verification';
 import { SendOtpDto, VerifyOtpDto } from './interfaces/verification.dto';
-import { VerifyDto } from '../auth/interfaces/verifydto';
 
 @ApiTags('Verification')
 @Controller('verification')
@@ -27,7 +26,7 @@ export class VerificationController {
     ${EverificationTypes.RESET_PASSWORD}
     ${EverificationTypes.EDIT_PHONE}`
     })
-    @Post('send')
+    @Post('verify')
     VerifyOtp(@Body() body: VerifyOtpDto) {
         return this.verificationService.verifyOtp(body)
     }

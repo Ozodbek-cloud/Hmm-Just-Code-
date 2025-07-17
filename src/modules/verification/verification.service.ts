@@ -6,7 +6,6 @@ import { PrismaService } from 'src/core/prisma/prisma.service';
 import { generateOtp } from 'src/common/utils/random';
 import { secToMills } from 'src/common/utils/times';
 import { SmsService } from 'src/common/services/services.service';
-import { VerifyDto } from '../auth/interfaces/verifydto';
 
 @Injectable()
 export class VerificationService {
@@ -116,6 +115,7 @@ export class VerificationService {
             message: 'Verified'
         }
     }
+
     async CheckConfirmOtp(payload: VerifyOtpDto) {
         const { type, phone, otp } = payload
         const session = await this.redisService.get(

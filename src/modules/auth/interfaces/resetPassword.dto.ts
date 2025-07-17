@@ -8,7 +8,7 @@ export class ResetPasswordDto {
     @IsPhoneNumber()
     phone: string;
 
-    @ApiProperty({ example: 123456 })
+    @ApiProperty({ example: '00000' })
     @IsNumber()
     otp_code: number;
 
