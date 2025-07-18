@@ -1,23 +1,25 @@
-import { Controller, Post, Get,  Param, Body, Patch, Delete, Put} from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Patch, Delete, Put, Query } from '@nestjs/common';
 import { CourseCategoryService } from './course-category.service';
 import { CourseCategoryDto, UpdatedCourseCategoryDto } from './interfaces/course-category';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Course Categories')
 @Controller('course-categories')
 export class CourseCategoryController {
-  constructor(private readonly categoryService: CourseCategoryService) {}
+  constructor(private readonly categoryService: CourseCategoryService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get all course categories with related courses' })
   @ApiResponse({ status: 200, description: 'All course categories retrieved successfully.' })
-  async getAll() {
-    return await this.categoryService.get_all_course_category();
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
+  async getAll(@Query() query: any,) {
+    return await this.categoryService.get_all_course_category(query);
   }
 
   @Get('single/:id')
   @ApiOperation({ summary: 'Get one course category by ID' })
-  @ApiParam({name: 'id', type: Number, description: "ID of course category"})
+  @ApiParam({ name: 'id', type: Number, description: "ID of course category" })
   @ApiResponse({ status: 200, description: 'Course category retrieved successfully.' })
   @ApiResponse({ status: 404, description: 'Course category not found.' })
   async getOne(@Param('id') id: number) {

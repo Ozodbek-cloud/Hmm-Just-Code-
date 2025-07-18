@@ -4,7 +4,7 @@ import { CourseCategoryDto, UpdatedCourseCategoryDto } from './interfaces/course
 
 @Injectable()
 export class CourseCategoryService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) { }
 
     async create_category(payload: CourseCategoryDto) {
         try {
@@ -22,33 +22,56 @@ export class CourseCategoryService {
         }
     }
 
-    async get_all_course_category() {
-        try {
-            const all = await this.prismaService.courseCategory.findMany({
-                include: {
-                    courses: {
-                        select: {
-                            name: true,
-                            about: true,
-                            price: true,
-                            banner: true,
-                            introVideo: true,
-                            level: true,
-                            published: true,
-                        },
+    async get_all_course_category(query: any) {
+    try {
+        const limit = query.limit ? parseInt(query.limit) : 10;
+        let page = query.page ? parseInt(query.page) : 1;
+
+        const total = await this.prismaService.courseCategory.count();
+        const totalPages = Math.ceil(total / limit);
+
+
+        const offset = (page - 1) * limit;
+
+        const data = await this.prismaService.courseCategory.findMany({
+            skip: offset,
+            take: limit,
+            include: {
+                courses: {
+                    select: {
+                        name: true,
+                        about: true,
+                        price: true,
+                        banner: true,
+                        introVideo: true,
+                        level: true,
+                        published: true,
                     },
                 },
-            });
+            },
+        });
 
-            return {
-                success: true,
-                message: "Successfully Retrieved All Course Categories",
-                data: all,
-            };
-        } catch (error) {
-            throw new InternalServerErrorException(`Error retrieving course categories: ${error.message}`);
-        }
+        return {
+            success: true,
+            message: `Successfully retrieved Course Categories`,
+            data: data,
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: totalPages,
+            },
+        };
+    } catch (error) {
+        console.error('Error in get_all_course_category:', error);
+        return {
+            success: false,
+            message: 'Failed to retrieve Course Categories',
+            data: [],
+        };
     }
+}
+
 
     async get_one_course_category(id: number) {
         try {
