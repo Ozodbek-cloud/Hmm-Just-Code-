@@ -8,7 +8,7 @@ import { MentorProfilesModule } from 'src/modules/mentor-profiles/mentor-profile
 import { VerificationModule } from 'src/modules/verification/verification.module';
 import { SeedersModule } from 'src/core/seeders/seeders.module';
 import { CourseCategoryModule } from 'src/modules/course-category/course-category.module';
-import { UsersModule } from 'src/modules/users/users.module';
+import { UsersModule } from 'src/modules/profiles/profile.module';
 
 @Module({
     imports: [JwtModule, MailModule, RedisModule, PrismaModule, AuthModule, MentorProfilesModule, VerificationModule, UsersModule, CourseCategoryModule]

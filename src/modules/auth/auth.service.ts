@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from 'src/common/redis/redis.service';
 import { JwtAccessToken, JWtRefreshToken } from 'src/common/utils/jwt-utils';
@@ -8,6 +8,8 @@ import * as bcrypt from "bcrypt"
 import { LoginDto } from './interfaces/loginDto';
 import { VerificationService } from '../verification/verification.service';
 import { ResetPasswordDto } from './interfaces/resetPassword.dto';
+import { RefreshTokenDto } from './interfaces/refresh-token';
+import { EverificationTypes } from 'src/common/types/verification';
 
 interface JwtPayload {
     id: number,
@@ -35,6 +37,12 @@ export class AuthService {
     }
 
     async register(payload: Required<RegisterDto>) {
+        await this.verifiacationService.CheckConfirmOtp({
+            type: EverificationTypes.REGISTER,
+            phone: payload.phone,
+            otp: payload.otp_code
+        })
+
         let fullname = await this.prismaService.users.findFirst({ where: { fullName: payload.fullName } })
         if (fullname) throw new ConflictException(`${payload.fullName} is already registered!`)
         let phone = await this.prismaService.users.findFirst({ where: { phone: payload.phone } })
@@ -52,7 +60,11 @@ export class AuthService {
         let hash = await bcrypt.hash(payload.password, 10)
         let created = await this.prismaService.users.create({ data: { ...payload, password: hash } })
 
-        return { success: true, message: 'Successfully Registered, Next Step Login!', data: created }
+        return {
+            success: true,
+            message: 'Successfully Registered, Next Step Login!',
+            data: created
+        }
     }
 
 
@@ -81,10 +93,21 @@ export class AuthService {
         }
 
         let token = await this.generateToken({ id: exists.id, role: exists.role })
-        return { success: true, data: exists, token: token }
+        return {
+            success: true,
+            data: exists,
+            token: token
+        }
     }
 
     async reset_password(payload: Required<ResetPasswordDto>) {
+
+        await this.verifiacationService.CheckConfirmOtp({
+            type: EverificationTypes.RESET_PASSWORD,
+            phone: payload.phone,
+            otp: payload.otp_code.toString()
+        })
+
         let stored = await this.redisService.get(`pass:${payload.phone}`)
         if (!stored) throw new BadRequestException("Otp expire or not found")
 
@@ -105,4 +128,28 @@ export class AuthService {
             message: "Password Updated SuccessFully"
         }
     }
+
+    async refresh_token({ token }: RefreshTokenDto) {
+        try {
+            const payload = await this.jwtService.verifyAsync(token);
+            return {
+                message: "Token muddati hali tugamagan",
+                payload,
+            };
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                const payload = this.jwtService.decode(token) as { id: number; role: string };
+                if (!payload || !payload.id || !payload.role) {
+                    throw new UnauthorizedException('Yaroqsiz refresh token');
+                }
+                const tokens = await this.generateToken({ id: payload.id, role: payload.role }, true);
+                return {
+                    message: "Yangi token berildi (oldingi muddati tugagan edi)",
+                    tokens,
+                };
+            }
+            throw new UnauthorizedException('Noto‘g‘ri refresh token');
+        }
+    }
+
 }

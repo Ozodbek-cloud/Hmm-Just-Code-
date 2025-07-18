@@ -4,27 +4,8 @@ import { PrismaService } from 'src/core/prisma/prisma.service';
 
 @Injectable()
 export class MentorProfilesService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) { }
 
-    async update(id: number, payload: Partial<Update_Mentor_ProfileDto>) {
-        try {
-            const updated = await this.prismaService.mentorProfile.update({
-                where: { user_id: id },
-                data: { ...payload, user_id: id },
-            });
-
-            return {
-                success: true,
-                message: 'Successfully Updated Mentor Profile',
-                data: updated,
-            };
-        } catch (error) {
-            if (error.code === 'P2025') {
-                throw new NotFoundException(`Mentor with user_id ${id} not found`);
-            }
-            throw new InternalServerErrorException(`Error updating mentor profile: ${error.message}`);
-        }
-    }
 
     async get_all() {
         try {
@@ -43,7 +24,7 @@ export class MentorProfilesService {
     async get_one_by_id(id: number) {
         try {
             const one = await this.prismaService.mentorProfile.findFirst({
-                where: { id:id },
+                where: { id: id },
             });
 
             if (!one) {
@@ -64,7 +45,7 @@ export class MentorProfilesService {
     async get_one_by_job(job: string) {
         try {
             const jobMatches = await this.prismaService.mentorProfile.findMany({
-                where: { job:job },
+                where: { job: job },
             });
 
             if (!jobMatches || jobMatches.length === 0) {

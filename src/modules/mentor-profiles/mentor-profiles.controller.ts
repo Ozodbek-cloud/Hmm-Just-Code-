@@ -9,15 +9,6 @@ import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiResponse, ApiConsumes } fr
 export class MentorProfilesController {
     constructor(private readonly mentorService: MentorProfilesService) { }
 
-    @Patch(':id/update/mentor')
-    @ApiOperation({ summary: 'Update a Mentor profile' })
-    @ApiParam({ name: 'id', type: Number, description: 'Mentor profile Id', example: 1 })
-    @ApiResponse({ status: 200, description: 'Mentor profile updated successfully' })
-    @ApiResponse({ status: 400, description: 'Bad request or validation error' })
-    @ApiResponse({ status: 404, description: 'Mentor not found' })
-    async Updated(@Param('id') id: number, @Body() payload: Update_Mentor_ProfileDto, image: Express.Multer.File) {
-        return this.mentorService.update(+id, payload);
-    }
 
     @Get(':id/mentor-id')
     @ApiOperation({ summary: 'Get One Mentor Profile' })

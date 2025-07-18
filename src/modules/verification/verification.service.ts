@@ -100,7 +100,7 @@ export class VerificationService {
         if (!session) {
             throw new HttpException('OTP expired!', HttpStatus.BAD_REQUEST);
         }
-        if (otp !== JSON.parse(session).otp) {
+        if (otp !== JSON.parse(session)) {
             throw new HttpException('Invalid Otp!', HttpStatus.BAD_REQUEST)
         }
 
@@ -124,7 +124,7 @@ export class VerificationService {
         if (!session) {
             throw new HttpException('Session expired!', HttpStatus.BAD_REQUEST);
         }
-        if (otp !== JSON.parse(session).otp) {
+        if (otp !== JSON.parse(session)) {
             throw new HttpException('Invalid Otp!', HttpStatus.BAD_REQUEST)
         }
 
