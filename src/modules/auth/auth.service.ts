@@ -79,6 +79,7 @@ export class AuthService {
                 });
             }
         }
+
         let token = await this.generateToken({ id: exists.id, role: exists.role })
         return { success: true, data: exists, token: token }
     }

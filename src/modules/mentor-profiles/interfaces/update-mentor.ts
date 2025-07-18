@@ -14,11 +14,6 @@ export class Update_Mentor_ProfileDto {
     @IsNotEmpty()
     job: string;
 
-    @ApiProperty({ example: "example.png", description: "Mentors Image", format: 'binary'})
-    @IsString()
-    @IsOptional()
-    @IsNotEmpty()
-    image: string;
 
     @ApiProperty({ example: 5, description: "Years of experience" })
     @IsNumber()

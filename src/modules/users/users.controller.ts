@@ -1,11 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Put, UnsupportedMediaTypeException, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Put, Req, UnsupportedMediaTypeException, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { v4 as uuidv4 } from "uuid"
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './interfaces/user-dto';
 
 @Controller('users')
 export class UsersController {
@@ -16,10 +15,22 @@ export class UsersController {
     @Patch(':id/update')
     @ApiOperation({ summary: 'Update a User profile' })
     @ApiConsumes('multipart/form-data')
-    @ApiParam({ name: 'id', type: Number, description: 'User profile Id', example: 1 })
     @ApiResponse({ status: 200, description: 'User profile updated successfully' })
     @ApiResponse({ status: 400, description: 'Bad request or validation error' })
     @ApiResponse({ status: 404, description: 'User not found' })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                image: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'User image file (jpg, png, etc.)',
+                },
+            },
+        },
+    })
+
     @UseInterceptors(FileInterceptor('image', {
         storage: diskStorage({
             destination: "./uploads/image",
@@ -37,8 +48,8 @@ export class UsersController {
             callback(null, true)
         }
     }))
-    Update(@Param('id') id: number, @Body() payload: UpdateUserDto, image: Express.Multer.File) {
-        return this.userService.update_profile(+id, payload, image)
+    Update(@Param('id') id: number, @UploadedFile() image: Express.Multer.File) {
+        return this.userService.update_profile(+id, image)
     }
 
 

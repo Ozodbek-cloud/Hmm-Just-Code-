@@ -1,0 +1,37 @@
+
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: dars4
+    ports:
+      - "5431:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: my_app
+    restart: always
+    ports:
+      - "3005:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: >
+      sh -c "
+      npx prisma generate &&
+      npx prisma migrate deploy &&
+      npm run start:prod
+      "
+
+volumes:
+  data:
+
