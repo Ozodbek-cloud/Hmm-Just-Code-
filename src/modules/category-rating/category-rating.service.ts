@@ -7,8 +7,8 @@ export class CategoryRatingService {
   constructor(private prismaService: PrismaService) { }
 
 
-  async create(payload: CreateRatingDto) {
-    let created = await this.prismaService.rating.create({ data: payload })
+  async create(userId: number, payload: CreateRatingDto) {
+    let created = await this.prismaService.rating.create({ data: {...payload, userId: userId} })
     return {
       success: true,
       message: "Successfully Created Rating",

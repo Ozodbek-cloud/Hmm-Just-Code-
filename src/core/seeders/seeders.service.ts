@@ -18,8 +18,8 @@ export class SeedersService implements OnModuleInit {
   async userSeeder() {
 
     const fullName = "Ozodbek Nasriddinov"
-    const password = "cRcD+2WQNGu(_RS"
-    const phone = "+998945683666"
+    const password = "cRcD+2WQNGu("
+    const phone = "+998945683699"
 
 
     const hashedPassword = await bcrypt.hash(password, 10);

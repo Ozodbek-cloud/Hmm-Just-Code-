@@ -10,6 +10,4 @@ export class CreateRatingDto {
   @ApiProperty({ example: 'abc123', description: 'Kurs ID' })
   courseId: string;
 
-  @ApiProperty({ example: 1, description: 'Foydalanuvchi IDsi' })
-  userId: number;
 }

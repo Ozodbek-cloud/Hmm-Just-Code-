@@ -23,60 +23,17 @@ export class CourseCategoryService {
     }
 
     async get_all_course_category(query: any) {
-    try {
-        const limit = query.limit ? parseInt(query.limit) : 10;
-        let page = query.page ? parseInt(query.page) : 1;
-
-        const total = await this.prismaService.courseCategory.count();
-        const totalPages = Math.ceil(total / limit);
-
-
-        const offset = (page - 1) * limit;
-
-        const data = await this.prismaService.courseCategory.findMany({
-            skip: offset,
-            take: limit,
-            include: {
-                courses: {
-                    select: {
-                        name: true,
-                        about: true,
-                        price: true,
-                        banner: true,
-                        introVideo: true,
-                        level: true,
-                        published: true,
-                    },
-                },
-            },
-        });
-
-        return {
-            success: true,
-            message: `Successfully retrieved Course Categories`,
-            data: data,
-            pagination: {
-                total,
-                page,
-                limit,
-                pages: totalPages,
-            },
-        };
-    } catch (error) {
-        console.error('Error in get_all_course_category:', error);
-        return {
-            success: false,
-            message: 'Failed to retrieve Course Categories',
-            data: [],
-        };
-    }
-}
-
-
-    async get_one_course_category(id: number) {
         try {
-            const one = await this.prismaService.courseCategory.findFirst({
-                where: { id },
+            const limit = query.limit ? parseInt(query.limit) : 10;
+            const offset = query.offset ? parseInt(query.offset) : 0;
+            const takeAll = query.limit === '0' || limit === 0;
+
+            const total = await this.prismaService.courseCategory.count();
+            const totalPages = takeAll ? 1 : Math.ceil(total / limit);
+
+            const data = await this.prismaService.courseCategory.findMany({
+                skip: offset,
+                ...(takeAll ? {} : { take: limit }),
                 include: {
                     courses: {
                         select: {
@@ -92,57 +49,98 @@ export class CourseCategoryService {
                 },
             });
 
-            if (!one) {
-                throw new NotFoundException(`Course category with ID ${id} not found`);
-            }
-
             return {
                 success: true,
-                message: "Successfully Retrieved One Course Category",
-                data: one,
+                message: `Successfully retrieved Course Categories`,
+                data,
+                pagination: {
+                    total,
+                    offset,
+                    limit: takeAll ? total : limit,
+                    pages: totalPages,
+                },
             };
         } catch (error) {
-            if (error instanceof NotFoundException) throw error;
-            throw new InternalServerErrorException(`Error retrieving course category: ${error.message}`);
+            console.error('Error in get_all_course_category:', error);
+            return {
+                success: false,
+                message: 'Failed to retrieve Course Categories',
+                data: [],
+            };
         }
     }
+
+
+    async get_one_course_category(id: number) {
+    try {
+        const one = await this.prismaService.courseCategory.findFirst({
+            where: { id },
+            include: {
+                courses: {
+                    select: {
+                        name: true,
+                        about: true,
+                        price: true,
+                        banner: true,
+                        introVideo: true,
+                        level: true,
+                        published: true,
+                    },
+                },
+            },
+        });
+
+        if (!one) {
+            throw new NotFoundException(`Course category with ID ${id} not found`);
+        }
+
+        return {
+            success: true,
+            message: "Successfully Retrieved One Course Category",
+            data: one,
+        };
+    } catch (error) {
+        if (error instanceof NotFoundException) throw error;
+        throw new InternalServerErrorException(`Error retrieving course category: ${error.message}`);
+    }
+}
 
     async update_course_category(id: number, payload: UpdatedCourseCategoryDto) {
-        try {
-            const updated = await this.prismaService.courseCategory.update({
-                where: { id },
-                data: payload,
-            });
+    try {
+        const updated = await this.prismaService.courseCategory.update({
+            where: { id },
+            data: payload,
+        });
 
-            return {
-                success: true,
-                message: "Successfully Updated Course Category",
-                data: updated,
-            };
-        } catch (error) {
-            if (error.code === 'P2025') {
-                throw new NotFoundException(`Course category with ID ${id} not found`);
-            }
-            throw new InternalServerErrorException(`Error updating course category: ${error.message}`);
+        return {
+            success: true,
+            message: "Successfully Updated Course Category",
+            data: updated,
+        };
+    } catch (error) {
+        if (error.code === 'P2025') {
+            throw new NotFoundException(`Course category with ID ${id} not found`);
         }
+        throw new InternalServerErrorException(`Error updating course category: ${error.message}`);
     }
+}
 
     async delete_course_category(id: number) {
-        try {
-            const deleted = await this.prismaService.courseCategory.delete({
-                where: { id },
-            });
+    try {
+        const deleted = await this.prismaService.courseCategory.delete({
+            where: { id },
+        });
 
-            return {
-                success: true,
-                message: "Successfully Deleted Course Category",
-                data: deleted,
-            };
-        } catch (error) {
-            if (error.code === 'P2025') {
-                throw new NotFoundException(`Course category with ID ${id} not found`);
-            }
-            throw new InternalServerErrorException(`Error deleting course category: ${error.message}`);
+        return {
+            success: true,
+            message: "Successfully Deleted Course Category",
+            data: deleted,
+        };
+    } catch (error) {
+        if (error.code === 'P2025') {
+            throw new NotFoundException(`Course category with ID ${id} not found`);
         }
+        throw new InternalServerErrorException(`Error deleting course category: ${error.message}`);
     }
+}
 }

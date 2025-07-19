@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Put, Req, UnsupportedMediaTypeException, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { v4 as uuidv4 } from "uuid"
@@ -9,6 +9,8 @@ import { UpdatePhone } from './interfaces/phone-dto';
 import { Updated_Password } from './interfaces/password-dto';
 import { UpdateLastActivityDto } from './interfaces/last-activity';
 import { Update_Mentor_ProfileDto } from '../mentor-profiles/interfaces/update-mentor';
+import { Auth } from 'src/core/decorators/decorators.service';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('Profiles')
 @Controller('my')
@@ -82,24 +84,26 @@ export class profilesController {
     }
 
     @Get('last-activity')
+    @ApiBearerAuth()
+    @Auth(UserRole.ADMIN)
     @ApiOperation({ summary: 'Get user last activity (STUDENT)' })
     @ApiResponse({ status: 200, description: 'Successfully retrieved last activity' })
     @ApiResponse({ status: 404, description: 'Last activity not found' })
-    async getLastActivity(@Param('user') user: any) {
-        const userId = user.id || 1; 
-        return this.profileService.getLastActivity(userId);
+    async getLastActivity(@Req() req: Request) {
+        return this.profileService.getLastActivity(req['user'].id);
     }
 
     @Put('last-activity')
+    @ApiBearerAuth()
+    @Auth(UserRole.STUDENT, UserRole.ADMIN)
     @ApiOperation({ summary: 'Update user last activity (STUDENT)' })
     @ApiResponse({ status: 200, description: 'Last activity updated successfully' })
     @ApiResponse({ status: 404, description: 'Last activity not found' })
     async updateLastActivity(
-        @Param('user') user: any,
+        @Req() req: Request,
         @Body() dto: UpdateLastActivityDto,
     ) {
-        const userId = user.id || 1;
-        return this.profileService.updateLastActivity(userId, dto);
+        return this.profileService.updateLastActivity(req['user'].id, dto);
     }
 
     @Patch('update-phone/:id')

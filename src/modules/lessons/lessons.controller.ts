@@ -6,7 +6,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiResponse, } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiResponse, ApiConsumes, } from '@nestjs/swagger';
 
 @ApiTags('Lessons')
 @Controller('lessons')
@@ -14,6 +14,7 @@ export class LessonsController {
   constructor(private readonly lessonsService: LessonsService) { }
 
   @Post()
+  @ApiConsumes('multipart/from-data')
   @UseInterceptors(
     FileInterceptor('video', {
       storage: diskStorage({
@@ -84,6 +85,7 @@ export class LessonsController {
   )
   @ApiOperation({ summary: 'Update a lesson and optionally replace the video' })
   @ApiParam({ name: 'id', required: true, description: 'Lesson ID to update' })
+  @ApiConsumes('multipart/from-data')
   @ApiResponse({ status: 200, description: 'Lesson successfully updated' })
   @ApiResponse({ status: 404, description: 'Lesson not found' })
   update(

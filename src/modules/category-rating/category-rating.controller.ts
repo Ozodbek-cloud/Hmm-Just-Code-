@@ -1,4 +1,4 @@
-import {Controller,Post,Get,Delete,Param,Body,Query} from '@nestjs/common';
+import {Controller,Post,Get,Delete,Param,Body,Query, Req} from '@nestjs/common';
 import { CategoryRatingService } from './category-rating.service';
 import { CreateRatingDto } from './interfaces/create-category-rating.dto';
 import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiResponse } from '@nestjs/swagger';
@@ -12,8 +12,8 @@ export class CategoryRatingController {
   @ApiOperation({ summary: 'Create a new rating' })
   @ApiBody({ type: CreateRatingDto })
   @ApiResponse({ status: 201, description: 'Successfully created rating' })
-  create(@Body() payload: CreateRatingDto) {
-    return this.ratingService.create(payload);
+  create(@Req() req: Request, @Body() payload: CreateRatingDto) {
+    return this.ratingService.create(req['user'].id, payload );
   }
 
   @Get()
