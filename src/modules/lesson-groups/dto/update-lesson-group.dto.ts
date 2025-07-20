@@ -1,4 +1,7 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateLessonGroupDto } from './create-lesson-group.dto';
+import { IsNotEmpty, IsString } from "class-validator";
 
-export class UpdateLessonGroupDto extends PartialType(CreateLessonGroupDto) {}
+export class UpdateLessonGroupDto  {
+    @IsString()
+    @IsNotEmpty()
+    name: string
+}

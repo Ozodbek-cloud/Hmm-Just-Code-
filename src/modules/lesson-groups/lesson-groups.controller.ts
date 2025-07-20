@@ -1,43 +1,68 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, } from '@nestjs/common';
 import { LessonGroupsService } from './lesson-groups.service';
 import { CreateLessonGroupDto } from './dto/create-lesson-group.dto';
 import { UpdateLessonGroupDto } from './dto/update-lesson-group.dto';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiQuery, ApiBody, } from '@nestjs/swagger';
 
+@ApiTags('Lesson Groups')
 @Controller('lesson-groups')
 export class LessonGroupsController {
   constructor(private readonly lessonGroupsService: LessonGroupsService) { }
-
-  @Post()
-  create(@Body() createLessonGroupDto: CreateLessonGroupDto) {
-    return this.lessonGroupsService.create(createLessonGroupDto);
-  }
-
   @Get('all/:course_id')
-  @ApiOperation({ summary: 'Berilgan course bo‘yicha lesson group larni olish (limit, offset, lessons qo‘shish opsiyasi bilan)' })
-  @ApiResponse({ status: 200, description: 'OK' })
+  @ApiOperation({ summary: 'Get lesson groups by course ID (with optional pagination and lessons inclusion)' })
+  @ApiParam({ name: 'course_id', type: String, description: 'ID of the course' })
+  @ApiQuery({ name: 'offset', required: false, type: String, description: 'Number of records to skip' })
+  @ApiQuery({ name: 'limit', required: false, type: String, description: 'Maximum number of records to return' })
+  @ApiQuery({
+    name: 'include_lessons', required: false, schema: { type: 'boolean', enum: [true, false] },
+    description: 'Include lessons inside each group (true/false)',
+  }) @ApiResponse({ status: 200, description: 'Lesson groups retrieved successfully' })
   findAllByCourseId(
     @Param('course_id') courseId: string,
     @Query('offset') offset?: string,
     @Query('limit') limit?: string,
     @Query('include_lessons') includeLessons?: string,
+
   ) {
-    return this.lessonGroupsService.findAllByCourseId(courseId, { offset, limit, include_lessons: includeLessons });
+    return this.lessonGroupsService.findAllByCourseId(courseId, {
+      offset,
+      limit,
+      include_lessons: includeLessons,
+    });
   }
 
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.lessonGroupsService.findOne(+id);
+  @Get(':id/details')
+  @ApiOperation({ summary: 'Get a single lesson group by ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Lesson Group ID' })
+  @ApiResponse({ status: 200, description: 'Lesson group found' })
+  @ApiResponse({ status: 404, description: 'Lesson group not found' })
+  findOne(@Param('id') id: number) {
+    return this.lessonGroupsService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLessonGroupDto: UpdateLessonGroupDto) {
-    return this.lessonGroupsService.update(+id, updateLessonGroupDto);
+  @Post('create')
+  @ApiOperation({ summary: 'Create a new lesson group' })
+  @ApiResponse({ status: 201, description: 'Lesson group successfully created' })
+  @ApiResponse({ status: 400, description: 'Invalid input or creation failed' })
+  create(@Body() createLessonGroupDto: CreateLessonGroupDto) {
+    return this.lessonGroupsService.create(createLessonGroupDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.lessonGroupsService.remove(+id);
+  @Patch(':id/update')
+  @ApiOperation({ summary: 'Update a lesson group by ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID of the lesson group to update' })
+  @ApiResponse({ status: 200, description: 'Lesson group updated successfully' })
+  @ApiResponse({ status: 404, description: 'Lesson group not found' })
+  update(@Param('id') id: number, @Body() updateLessonGroupDto: UpdateLessonGroupDto) {
+    return this.lessonGroupsService.update(id, updateLessonGroupDto);
+  }
+
+  @Delete(':id/delete')
+  @ApiOperation({ summary: 'Delete a lesson group by ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID of the lesson group to delete' })
+  @ApiResponse({ status: 200, description: 'Lesson group deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Lesson group not found' })
+  remove(@Param('id') id: number) {
+    return this.lessonGroupsService.remove(id);
   }
 }

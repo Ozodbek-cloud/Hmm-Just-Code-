@@ -1,4 +1,4 @@
-import {Controller,Post,Get,Delete,Param,Body,Query, Req} from '@nestjs/common';
+import { Controller, Post, Get, Delete, Param, Body, Query, Req } from '@nestjs/common';
 import { CategoryRatingService } from './category-rating.service';
 import { CreateRatingDto } from './interfaces/create-category-rating.dto';
 import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiResponse } from '@nestjs/swagger';
@@ -6,17 +6,10 @@ import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiResponse } from 
 @ApiTags('Category Ratings')
 @Controller('category-ratings')
 export class CategoryRatingController {
-  constructor(private readonly ratingService: CategoryRatingService) {}
+  constructor(private readonly ratingService: CategoryRatingService) { }
 
-  @Post()
-  @ApiOperation({ summary: 'Create a new rating' })
-  @ApiBody({ type: CreateRatingDto })
-  @ApiResponse({ status: 201, description: 'Successfully created rating' })
-  create(@Req() req: Request, @Body() payload: CreateRatingDto) {
-    return this.ratingService.create(req['user'].id, payload );
-  }
 
-  @Get()
+  @Get('latest')
   @ApiOperation({ summary: 'Get all ratings' })
   @ApiResponse({ status: 200, description: 'All ratings retrieved successfully' })
   findAll() {
@@ -40,6 +33,14 @@ export class CategoryRatingController {
   @ApiParam({ name: 'courseId', type: String, description: 'ID of the course' })
   getAnalytics(@Param('courseId') courseId: string) {
     return this.ratingService.getAnalytics(courseId);
+  }
+
+  @Post('add/rating')
+  @ApiOperation({ summary: 'Create a new rating' })
+  @ApiBody({ type: CreateRatingDto })
+  @ApiResponse({ status: 201, description: 'Successfully created rating' })
+  create(@Req() req: Request, @Body() payload: CreateRatingDto) {
+    return this.ratingService.create(req['user'].id, payload);
   }
 
   @Delete(':id')

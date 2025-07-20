@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateLessonGroupDto } from './dto/create-lesson-group.dto';
 import { UpdateLessonGroupDto } from './dto/update-lesson-group.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
@@ -51,13 +51,13 @@ export class LessonGroupsService {
   }
 
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     let findone = await this.prismaService.lessonGroup.findFirst({
       where: {
-        courseId: id
+        id: id
       },
       include: {
-        courses:{
+        courses: {
           select: {
             name: true,
             about: true,
@@ -72,16 +72,72 @@ export class LessonGroupsService {
             userId: true,
             url: true
           }
+        },
+        lessons: {
+          select: {
+            name: true,
+            about: true,
+            video: true
+          },
+        },
+        exam: {
+          select: {
+            question: true,
+            variantA: true,
+            variantB: true,
+            variantC: true,
+            variantD: true,
+            answer: true
+          }
+        },
+        examResult: {
+          select: {
+            userId: true,
+            passed: true,
+            corrects: true,
+            wrongs: true
+          }
         }
       }
     })
+    if (!findone) throw new NotFoundException(`This ${id} is not found`)
+
+    return {
+      success: true,
+      message: "Successfully Getted One LessonGroup",
+      data: findone
+    }
   }
 
-  async update(id: number, updateLessonGroupDto: UpdateLessonGroupDto) {
-    return `This action updates a #${id} lessonGroup`;
+  async update(id: number, payload: UpdateLessonGroupDto) {
+    let updated = await this.prismaService.lessonGroup.update({
+      where: {
+        id: id
+      },
+      data: payload
+    })
+    if (!updated) throw new NotFoundException(`This ${id} is not found`)
+
+    return {
+      success: true,
+      message: 'Successfully Updated LessonGroup',
+      data: updated
+    }
   }
 
   async remove(id: number) {
-    return `This action removes a #${id} lessonGroup`;
+    let deleted = await this.prismaService.lessonGroup.delete({
+      where: {
+        id: id
+      }
+    })
+    if (!id) throw new NotFoundException(`This ${id} is not found`)
+
+    return {
+      success: true,
+      message: "Successfully Deleted LessonGroup",
+      data: deleted
+    }
+
   }
 }
