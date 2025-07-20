@@ -10,7 +10,5 @@ export function setupSwagger(app: INestApplication): void {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api_ozodbek_swagger', app, document, {
-    customCssUrl: '/swagger-custom.css',
-  });
+  SwaggerModule.setup('api_ozodbek_swagger', app, document);
 }

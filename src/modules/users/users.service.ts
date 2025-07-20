@@ -1,0 +1,271 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateAsisstandDto, CreateMentor, CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from 'src/core/prisma/prisma.service';
+
+@Injectable()
+export class UsersService {
+  constructor(private prismaService: PrismaService) { }
+
+  async create_admin(payload: CreateUserDto) {
+    let created = await this.prismaService.users.create({
+      data: {
+        ...payload,
+        role: "ADMIN"
+      }
+    })
+
+    return {
+      success: true,
+      message: "Successully Created Admin",
+      data: created
+    }
+
+  }
+
+  async findAllByCourseId(name: string, query: any) {
+    const limit = query.limit ? parseInt(query.limit) : 10;
+    const page = query.page ? parseInt(query.page) : 1;
+    const offset = (page - 1) * limit;
+
+    const where = {
+      fullName: name,
+    };
+
+    const total = await this.prismaService.users.count({ where });
+
+    const data = await this.prismaService.users.findMany({
+      where,
+      skip: offset,
+      take: limit,
+    });
+
+    return {
+      success: true,
+      message: `Successfully Getted Users`,
+      data,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+  async create_mentor(payload: CreateMentor) {
+    return this.prismaService.$transaction(async (tx) => {
+      const user = await tx.users.create({
+        data: {
+          phone: payload.phone,
+          fullName: payload.fullName,
+          password: payload.password,
+          role: 'MENTOR',
+        },
+      });
+
+      const mentorProfile = await tx.mentorProfile.create({
+        data: {
+          about: payload.about,
+          job: payload.job,
+          experience: payload.experience,
+          telegram: payload.telegram,
+          instagram: payload.instagram,
+          linkedin: payload.linkedin,
+          facebook: payload.facebook,
+          github: payload.github,
+          website: payload.website,
+          user_id: user.id
+        },
+      });
+
+      return {
+        success: true,
+        message: "Successfully Created Mentor",
+        data: {
+          phone: user.phone,
+          fullName: user.fullName,
+          password: user.password,
+          about: mentorProfile.about,
+          job: mentorProfile.job,
+          experience: mentorProfile.experience,
+          telegram: mentorProfile.telegram,
+          linkedin: mentorProfile.linkedin,
+          facebook: mentorProfile.facebook,
+          github: mentorProfile.github,
+          website: mentorProfile.website
+        }
+
+      };
+    });
+  }
+  async create_assistand(payload: CreateAsisstandDto) {
+    let created = await this.prismaService.users.create({
+      data: {
+
+        ...payload, role: "ASSISTANT"
+      }
+    })
+    return {
+      success: true,
+      message: "Successfully Created Asisstant",
+      data: created
+    }
+
+  }
+
+
+  async find_by_mentor(id: number) {
+    let findOne = await this.prismaService.mentorProfile.findFirst({
+      where: {
+        user_id: id
+      }
+    })
+    if (!findOne) throw new NotFoundException(`This ${id} is not found`)
+
+    return {
+      success: true,
+      message: "Successfully Getted One User",
+      data: findOne
+    }
+  }
+  async find_single(id: number) {
+    const single = await this.prismaService.users.findFirst({
+      where: { id },
+      select: {
+        id: true,
+        phone: true,
+        fullName: true,
+        role: true,
+        image: true,
+        createdAt: true,
+
+        courses: {
+          select: {
+            id: true,
+            name: true,
+            about: true,
+            price: true,
+            banner: true,
+            introVideo: true,
+            level: true,
+            published: true,
+            createdAt: true
+          }
+        },
+
+        assignedCourses: {
+          select: {
+            userId: true,
+            courseId: true,
+            createdAt: true
+          }
+        },
+
+        purchasedCourses: {
+          select: {
+            courseId: true,
+            userId: true,
+            amount: true,
+            paidVia: true,
+            purchasedAt: true
+          }
+        },
+
+        rating: {
+          select: {
+            rate: true,
+            comment: true,
+            userId: true,
+            courseId: true,
+            createdAt: true
+          }
+        },
+
+        lastActivity: {
+          select: {
+            userId: true,
+            courseId: true,
+            groupId: true,
+            lessonId: true,
+            url: true,
+            createdAt: true
+          }
+        },
+
+        lessonView: {
+          select: {
+            lessonId: true,
+            userId: true,
+            view: true
+          }
+        },
+
+        homeworkSubmission: {
+          select: {
+            id: true,
+            homeworkId: true,
+            text: true,
+            reason: true,
+            status: true,
+            userId: true,
+            createdAt: true,
+            updatedAt: true
+          }
+        },
+
+        examResult: {
+          select: {
+            id: true,
+            lessonGroupId: true,
+            userId: true,
+            passed: true,
+            corrects: true,
+            wrongs: true,
+            createdAt: true
+          }
+        },
+
+        question: {
+          select: {
+            id: true,
+            userId: true,
+            courseId: true,
+            text: true,
+            file: true,
+            read: true,
+            readAt: true,
+            updatedAt: true,
+            createdAt: true
+          }
+        },
+
+        questionAnswer: {
+          select: {
+            id: true,
+            questionId: true,
+            userId: true,
+            text: true,
+            file: true,
+            updatedAt: true,
+            createdAt: true
+          }
+        }
+      }
+    });
+
+    return {
+      success: true,
+      message: "Successfully Getted Single User",
+      data: single
+    };
+  }
+
+
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    return `This action updates a #${id} user`;
+  }
+
+  async remove(id: number) {
+    return `This action removes a #${id} user`;
+  }
+}

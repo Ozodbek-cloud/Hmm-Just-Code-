@@ -1,7 +1,48 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
-export class Update_Mentor_ProfileDto {
+export class CreateUserDto {
+    @ApiProperty({
+        example: '+998948855888',
+        description: 'Telephone Number',
+    })
+    @IsString()
+    @IsPhoneNumber()
+    @IsNotEmpty()
+    phone: string;
+
+    @ApiProperty({
+        example: 'NoName',
+        description: 'Full Name',
+    })
+    @IsString()
+    @IsNotEmpty()
+    fullName: string;
+
+    @ApiProperty({
+        example: '12345678',
+        description: 'Password',
+    })
+    @IsString()
+    @IsNotEmpty()
+    password: string;
+}
+export class CreateMentor {
+    @ApiProperty({example: '+998945686677'})
+    @IsPhoneNumber()
+    @IsNotEmpty()
+    phone: string
+
+    @ApiProperty({example: 'Ozodbek Adminjonov'})
+    @IsString()
+    @IsNotEmpty()
+    fullName: string
+
+    @ApiProperty({example: 'cRcD+2WQNGu(_RS'})
+    @IsString()
+    @IsNotEmpty()
+    password: string
+
     @ApiProperty({ example: "Software engineer with 5+ years of experience", description: "Short bio or about section" })
     @IsString()
     @IsOptional()
@@ -56,4 +97,28 @@ export class Update_Mentor_ProfileDto {
     @IsNotEmpty()
     @IsOptional()
     website: string
+
+}
+
+export class CreateAsisstandDto {
+    @ApiProperty({example: '+998945686677'})
+    @IsPhoneNumber()
+    @IsNotEmpty()
+    phone: string
+
+    @ApiProperty({example: 'Ozodbek Adminjonov'})
+    @IsString()
+    @IsNotEmpty()
+    fullName: string
+
+    @ApiProperty({example: 'cRcD+2WQNGu(_RS'})
+    @IsString()
+    @IsNotEmpty()
+    password: string
+
+
+    @ApiProperty({example: 'iefwbiew'})
+    @IsString()
+    @IsNotEmpty()
+    courseId: string
 }

@@ -10,29 +10,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/
 export class ExamController {
   constructor(private readonly examService: ExamService) { }
 
-  @Post()
-  @ApiOperation({ summary: 'Create one exam' })
-  @ApiResponse({ status: 201, description: 'Exam successfully created' })
-  create(@Body() createExamDto: CreateExamDto) {
-    return this.examService.create(createExamDto);
-  }
 
-  @Post('bulk')
-  @ApiOperation({ summary: 'Create many exams' })
-  @ApiResponse({ status: 201, description: 'Exams successfully created' })
-  createMany(@Body() createManyExamsDto: CreateManyExamsDto) {
-    return this.examService.createMany(createManyExamsDto);
-  }
-
-  @Post('pass/:userId')
-  @ApiOperation({ summary: 'Pass an exam by user' })
-  @ApiParam({ name: 'userId', type: Number })
-  @ApiResponse({ status: 200, description: 'Exam result' })
-  PassExam(@Param('userId') userId: number, @Body() dto: PassExamDto) {
-    return this.examService.passExam(dto, userId);
-  }
-
-  @Get()
+  @Get('get/all')
   @ApiOperation({ summary: 'Get all exams' })
   @ApiResponse({ status: 200, description: 'List of all exams' })
   findAll() {
@@ -63,6 +42,27 @@ export class ExamController {
     return this.examService.get_detail_of_exam(id);
   }
 
+  @Post('create/one')
+  @ApiOperation({ summary: 'Create one exam' })
+  @ApiResponse({ status: 201, description: 'Exam successfully created' })
+  create(@Body() createExamDto: CreateExamDto) {
+    return this.examService.create(createExamDto);
+  }
+
+  @Post('create/many')
+  @ApiOperation({ summary: 'Create many exams' })
+  @ApiResponse({ status: 201, description: 'Exams successfully created' })
+  createMany(@Body() createManyExamsDto: CreateManyExamsDto) {
+    return this.examService.createMany(createManyExamsDto);
+  }
+
+  @Post('pass/:userId')
+  @ApiOperation({ summary: 'Pass an exam by user' })
+  @ApiParam({ name: 'userId', type: Number })
+  @ApiResponse({ status: 200, description: 'Exam result' })
+  PassExam(@Param('userId') userId: number, @Body() dto: PassExamDto) {
+    return this.examService.passExam(dto, userId);
+  }
   @Patch(':id')
   @ApiOperation({ summary: 'Update an exam by ID' })
   @ApiParam({ name: 'id', type: Number })
@@ -94,5 +94,22 @@ export class ExamController {
     @Query() query: any,
   ) {
     return this.examService.get_exam_results(+lessonGroupId, +userId, query);
+  }
+
+  @Get('results/mentor')
+  @ApiOperation({ summary: 'Get exam results with filters and pagination for Mentor' })
+  @ApiQuery({ name: 'date_from', required: false, type: String, example: '2024-01-01' })
+  @ApiQuery({ name: 'date_to', required: false, type: String, example: '2024-12-31' })
+  @ApiQuery({ name: 'id', required: true, type: String })
+  @ApiQuery({ name: 'offset', required: false, type: String, example: '0' })
+  @ApiQuery({ name: 'limit', required: false, type: String, example: '8' })
+  @ApiQuery({ name: 'user_id', required: true, type: String })
+  @ApiQuery({ name: 'passed', required: false, enum: ['true', 'false'], example: 'false', type: String })
+  async getResultsMentor(
+    @Query('id') Id: number,
+    @Query('user_id') userId: number,
+    @Query() query: any,
+  ) {
+    return this.examService.get_exam_results(+Id, +userId, query);
   }
 }
