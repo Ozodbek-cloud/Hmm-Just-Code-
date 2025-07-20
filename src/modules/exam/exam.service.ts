@@ -245,4 +245,53 @@ export class ExamService {
       data: deleted
     }
   }
+  async get_exam_results(lessonGroupId: number, userId: number, query: any) {
+    const limit = parseInt(query.limit) || 10;
+    const offset = parseInt(query.offset) || 0;
+
+    const filters: any = {
+      lessonGroupId,
+      userId,
+    };
+
+    if (query.passed !== undefined) {
+      filters.passed = query.passed === 'true';
+    }
+
+    if (query.date_from || query.date_to) {
+      filters.createdAt = {};
+      if (query.date_from) {
+        filters.createdAt.gte = new Date(query.date_from);
+      }
+      if (query.date_to) {
+        filters.createdAt.lte = new Date(query.date_to);
+      }
+    }
+
+    const total = await this.prismaService.examResult.count({
+      where: filters,
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    const data = await this.prismaService.examResult.findMany({
+      where: filters,
+      skip: offset,
+      take: limit,
+    });
+
+    return {
+      success: true,
+      message: "Exam results fetched successfully",
+      data,
+      pagination: {
+        total,
+        limit,
+        offset,
+        pages: totalPages,
+      },
+    };
+  }
+
+
 }

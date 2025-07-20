@@ -78,4 +78,21 @@ export class ExamController {
   remove(@Param('id') id: number) {
     return this.examService.remove(id);
   }
+
+  @Get('results')
+  @ApiOperation({ summary: 'Get exam results with filters and pagination' })
+  @ApiQuery({ name: 'date_from', required: false, type: String, example: '2024-01-01' })
+  @ApiQuery({ name: 'date_to', required: false, type: String, example: '2024-12-31' })
+  @ApiQuery({ name: 'offset', required: false, type: String, example: '0' })
+  @ApiQuery({ name: 'limit', required: false, type: String, example: '8' })
+  @ApiQuery({ name: 'lesson_group_id', required: true, type: String })
+  @ApiQuery({ name: 'user_id', required: true, type: String })
+  @ApiQuery({ name: 'passed', required: false, enum: ['true', 'false'], example: 'false', type: String })
+  async getResults(
+    @Query('lesson_group_id') lessonGroupId: number,
+    @Query('user_id') userId: number,
+    @Query() query: any,
+  ) {
+    return this.examService.get_exam_results(+lessonGroupId, +userId, query);
+  }
 }
