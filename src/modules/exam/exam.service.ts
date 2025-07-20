@@ -1,7 +1,26 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateExamDto, CreateManyExamsDto } from './interfaces/create-exam.dto';
 import { UpdateExamDto } from './interfaces/update-exam.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import { PassExamDto } from './interfaces/pass-the-exam.dto';
+import { ExamAnswer } from '@prisma/client';
+
+export interface ExamQuestionResult {
+  questionId: number
+  userAnswer: ExamAnswer
+  correctAnswer: ExamAnswer
+  isCorrect: boolean
+}
+
+export interface PassExamResult {
+  success: boolean
+  score: number
+  correctAnswers: number
+  uncorrectAnswers: number
+  totalQuestions: number
+  passed: boolean
+  results: ExamQuestionResult[]
+}
 
 @Injectable()
 export class ExamService {
@@ -17,6 +36,7 @@ export class ExamService {
       data: created
     }
   }
+
   async createMany(createManyExamsDto: CreateManyExamsDto) {
     const { lessonGroupId, exams } = createManyExamsDto
 
@@ -41,6 +61,73 @@ export class ExamService {
       success: true,
       count: result.count,
       message: `${result.count} Created`,
+    }
+  }
+
+  async passExam(passExamDto: PassExamDto, userId: number): Promise<PassExamResult> {
+    const { lessonGroupId, answers } = passExamDto
+
+    const lessonGroup = await this.prismaService.lessonGroup.findUnique({
+      where: { id: lessonGroupId },
+    })
+
+    if (!lessonGroup) throw new NotFoundException("Lesson group not found")
+
+
+    const examQuestions = await this.prismaService.exam.findMany({
+      where: { lessonGroupId },
+    })
+
+    if (examQuestions.length === 0) throw new NotFoundException("No exam questions found for this lesson group")
+
+    let correctAnswers = 0
+    let uncorrectAnswers = 0
+    const results: ExamQuestionResult[] = []
+
+    for (const answer of answers) {
+      const question = examQuestions.find((q) => q.id === answer.id)
+
+      if (!question) throw new BadRequestException(`Question with id ${answer.id} not found`)
+
+
+      const isCorrect = question.answer === answer.answer
+      if (isCorrect) {
+        correctAnswers++
+      } else {
+        uncorrectAnswers++
+      }
+
+      results.push({
+        questionId: answer.id,
+        userAnswer: (answer.answer) as ExamAnswer,
+        correctAnswer: question.answer,
+        isCorrect,
+      })
+    }
+
+    const totalQuestions = examQuestions.length
+    const wrongAnswers = totalQuestions - correctAnswers
+    const score = Math.round((correctAnswers / totalQuestions) * 100)
+    const passed = score >= 70
+
+    await this.prismaService.examResult.create({
+      data: {
+        userId,
+        lessonGroupId,
+        corrects: correctAnswers,
+        wrongs: wrongAnswers,
+        passed,
+      },
+    })
+
+    return {
+      success: true,
+      score,
+      correctAnswers,
+      uncorrectAnswers,
+      totalQuestions,
+      passed,
+      results,
     }
   }
 
