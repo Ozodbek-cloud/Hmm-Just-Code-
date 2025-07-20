@@ -96,12 +96,35 @@ export class ExamService {
       }
     })
     if (!detail) throw new NotFoundException(`This ${lesson_group_id} is not found`)
-    
-      return {
-        success: true,
-        message: "Successfully Getted Details of LessonGroup",
-        data: detail
+
+    return {
+      success: true,
+      message: "Successfully Getted Details of LessonGroup",
+      data: detail
+    }
+  }
+  async get_detail_of_exam(id: number) {
+    let find_detail = await this.prismaService.exam.findFirst({
+      where: {
+        id: id
+      },
+      include: {
+        lessonGroup: {
+          select: {
+            id: true,
+            name: true,
+            courseId: true
+          }
+        }
       }
+    })
+    if (!find_detail) throw new NotFoundException(`This ${id} is not found`)
+
+    return {
+      success: true,
+      message: "Successfully Getted Details Of Exam Questions",
+      data: find_detail
+    }
   }
 
 
@@ -128,7 +151,7 @@ export class ExamService {
       }
     })
     if (!deleted) throw new NotFoundException(`This ${id} id not found`)
-    
+
     return {
       success: true,
       message: "Successfully Deleted Exam Questions",
