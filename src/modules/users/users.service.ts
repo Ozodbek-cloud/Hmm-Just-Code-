@@ -132,6 +132,7 @@ export class UsersService {
         success: true,
         message: "Successfully Created Mentor",
         data: {
+          id: user.id,
           phone: user.phone,
           fullName: user.fullName,
           password: user.password,

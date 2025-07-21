@@ -82,7 +82,7 @@ model MentorProfile {
 
 model CourseCategory {
   id        Int      @id @default(autoincrement())
-  name      String
+  name      String   @unique
   createdAt DateTime @default(now())
 
   courses Course[]

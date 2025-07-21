@@ -7,9 +7,10 @@ import { LessonGroupsModule } from './modules/lesson-groups/lesson-groups.module
 import { LessonFileModule } from './modules/lesson-file/lesson-file.module';
 import { ExamModule } from './modules/exam/exam.module';
 import { UsersModule } from './modules/users/users.module';
+import { CourseModule } from './modules/course/course.module';
 
 
 @Module({
-  imports: [ConfigModule, LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, UsersModule],
+  imports: [ConfigModule, LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, UsersModule, CourseModule],
 })
 export class AppModule {}

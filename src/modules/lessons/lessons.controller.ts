@@ -14,7 +14,7 @@ export class LessonsController {
   constructor(private readonly lessonsService: LessonsService) { }
 
   @Post()
-  @ApiConsumes('multipart/from-data')
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('video', {
       storage: diskStorage({

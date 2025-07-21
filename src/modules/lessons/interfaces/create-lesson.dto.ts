@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateLessonDto {
@@ -13,13 +14,12 @@ export class CreateLessonDto {
   about: string
 
   @ApiProperty({example: "video.mpt4", description: "Video of lesson", format: "binary"})
-  @IsString()
-  @IsNotEmpty()
   video: string
 
   @ApiProperty({example: "1", description: "Id of Group"})
   @IsNumber()
   @IsNotEmpty()
+  @Type(() => Number)
   groupId: number
 
 }
