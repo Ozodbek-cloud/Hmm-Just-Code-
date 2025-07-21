@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAsisstandDto, CreateMentor, CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateMentorDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +24,7 @@ export class UsersService {
 
   }
 
-  async findAllByCourseId(name: string, query: any) {
+  async findAllByName(name: string, query: any) {
     const limit = query.limit ? parseInt(query.limit) : 10;
     const page = query.page ? parseInt(query.page) : 1;
     const offset = (page - 1) * limit;
@@ -52,8 +53,57 @@ export class UsersService {
       },
     };
   }
+
+  async findAllByNameAndRole(name: string, query: any) {
+    const limit = query.limit ? parseInt(query.limit) : 10;
+    const page = query.page ? parseInt(query.page) : 1;
+    const offset = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (name) where.fullName = { contains: name, mode: 'insensitive' }; // flexible qidiruv
+    if (query.role && Object.values(UserRole).includes(query.role)) {
+      where.role = query.role;
+    }
+
+    const total = await this.prismaService.users.count({ where });
+
+    const data = await this.prismaService.users.findMany({
+      where,
+      skip: offset,
+      take: limit,
+    });
+
+    return {
+      success: true,
+      message: `Successfully Fetched Users`,
+      data,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async find_by_phone(phone: string) {
+    let find_phone = await this.prismaService.users.findFirst({
+      where: {
+        phone: phone
+      }
+    })
+    if (!find_phone) throw new NotFoundException(`This ${phone} is not found`)
+
+    return {
+      success: true,
+      message: "Successfully Getted By Phone",
+      data: find_phone
+    }
+  }
+
   async create_mentor(payload: CreateMentor) {
-    return this.prismaService.$transaction(async (tx) => {
+    return await this.prismaService.$transaction(async (tx) => {
       const user = await tx.users.create({
         data: {
           phone: payload.phone,
@@ -261,11 +311,78 @@ export class UsersService {
   }
 
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update_mentor(userId: number, payload: UpdateMentorDto) {
+    return await this.prismaService.$transaction(async (tx) => {
+      const user = await tx.users.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      if (user.role !== 'MENTOR') {
+        throw new Error('User is not a mentor');
+      }
+
+      const updatedUser = await tx.users.update({
+        where: { id: userId },
+        data: {
+          ...(payload.phone && { phone: payload.phone }),
+          ...(payload.fullName && { fullName: payload.fullName }),
+          ...(payload.password && { password: payload.password }),
+        },
+      });
+
+      const updatedMentorProfile = await tx.mentorProfile.update({
+        where: { user_id: userId },
+        data: {
+          ...(payload.about && { about: payload.about }),
+          ...(payload.job && { job: payload.job }),
+          ...(payload.experience && { experience: payload.experience }),
+          ...(payload.telegram && { telegram: payload.telegram }),
+          ...(payload.instagram && { instagram: payload.instagram }),
+          ...(payload.linkedin && { linkedin: payload.linkedin }),
+          ...(payload.facebook && { facebook: payload.facebook }),
+          ...(payload.github && { github: payload.github }),
+          ...(payload.website && { website: payload.website }),
+        },
+      });
+
+      return {
+        success: true,
+        message: "Successfully Updated Mentor",
+        data: {
+          phone: updatedUser.phone,
+          fullName: updatedUser.fullName,
+          password: updatedUser.password,
+          about: updatedMentorProfile.about,
+          job: updatedMentorProfile.job,
+          experience: updatedMentorProfile.experience,
+          telegram: updatedMentorProfile.telegram,
+          instagram: updatedMentorProfile.instagram,
+          linkedin: updatedMentorProfile.linkedin,
+          facebook: updatedMentorProfile.facebook,
+          github: updatedMentorProfile.github,
+          website: updatedMentorProfile.website,
+        },
+      };
+    });
   }
 
+
   async remove(id: number) {
-    return `This action removes a #${id} user`;
+    let find_deleted = await this.prismaService.users.delete({
+      where: {
+        id: id
+      }
+    })
+    if (!find_deleted) throw new NotFoundException(`This ${id} is not found`)
+
+    return {
+      success: true,
+      message: "Successfully Deleted User",
+      data: find_deleted
+    }
   }
 }

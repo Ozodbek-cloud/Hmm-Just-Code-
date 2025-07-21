@@ -1,34 +1,91 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Put, Delete, Query, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto, CreateMentor, CreateAsisstandDto } from './dto/create-user.dto';
+import { UpdateMentorDto } from './dto/update-user.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Get('by-fullName/:name')
+  @ApiOperation({ summary: 'Find users by fullName' })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiResponse({ status: 200, description: 'Users fetched by course name' })
+  findByCourseName(@Param('name') name: string, @Query() query: any) {
+    return this.usersService.findAllByName(name, query);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Get('search')
+  @ApiOperation({ summary: 'Search users by name and role' })
+  @ApiQuery({ name: 'name', required: false, description: 'Search by fullName' })
+  @ApiQuery({ name: 'role', enum: UserRole, required: false, description: 'Filter by role' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items per page' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number' })
+  @ApiResponse({ status: 200, description: 'Filtered users list returned' })
+  async findAllByNameAndRole(@Query('name') name: string, @Query() query: any) {
+    return this.usersService.findAllByNameAndRole(name, query);
+  }
+  
+  @Get('mentor-profile/:id')
+  @ApiOperation({ summary: 'Get mentor profile by user ID' })
+  @ApiResponse({ status: 200, description: 'Mentor profile returned' })
+  findMentorByUserId(@Param('id') id: number) {
+    return this.usersService.find_by_mentor(+id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @Get(':id/full/details/users')
+  @ApiOperation({ summary: 'Get full user details by ID' })
+  @ApiResponse({ status: 200, description: 'Single user with all relations returned' })
+  findSingleUser(@Param('id') id: number) {
+    return this.usersService.find_single(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @Get('find_by/:phone/users')
+  @ApiOperation({ summary: 'Get User by user Phone' })
+  @ApiResponse({ status: 200, description: 'Phone User returned' })
+  findByPhone(@Param('phone') phone: string) {
+    return this.usersService.find_by_phone(phone);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Post('admin')
+  @ApiOperation({ summary: 'Create Admin' })
+  @ApiResponse({ status: 201, description: 'Admin created successfully' })
+  createAdmin(@Body() payload: CreateUserDto) {
+    return this.usersService.create_admin(payload);
+  }
+
+  @Post('mentor')
+  @ApiOperation({ summary: 'Create Mentor' })
+  @ApiResponse({ status: 201, description: 'Mentor created successfully' })
+  createMentor(@Body() payload: CreateMentor) {
+    return this.usersService.create_mentor(payload);
+  }
+
+  @Post('assistant')
+  @ApiOperation({ summary: 'Create Assistant' })
+  @ApiResponse({ status: 201, description: 'Assistant created successfully' })
+  createAssistant(@Body() payload: CreateAsisstandDto) {
+    return this.usersService.create_assistand(payload);
+  }
+
+  @Patch('mentor/:id')
+  @ApiOperation({ summary: 'Update mentor user and profile' })
+  @ApiResponse({ status: 200, description: 'Mentor updated successfully' })
+  updateMentor(
+    @Param('id') id: number,
+    @Body() payload: UpdateMentorDto
+  ) {
+    return this.usersService.update_mentor(+id, payload);
+  }
+
+  @Delete(':id/delete')
+  @ApiOperation({ summary: 'Delete user by ID' })
+  @ApiResponse({ status: 200, description: 'User deleted successfully' })
+  removeUser(@Param('id') id: number) {
     return this.usersService.remove(+id);
   }
 }
