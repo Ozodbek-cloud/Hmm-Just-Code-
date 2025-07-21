@@ -33,26 +33,31 @@ export class LessonFileController {
   @ApiOperation({ summary: 'Upload a lesson image file with metadata' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, description: 'Lesson file successfully created' })
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads/files',
-      filename: (req, file, cb) => {
-        const posterName = uuidv4() + extname(file.originalname);
-        cb(null, posterName);
-      }
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/videos',
+        filename: (req, file, cb) => {
+          const videoName = uuidv4() + extname(file.originalname);
+          cb(null, videoName);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        const allowed = ['video/mp4', 'video/webm'];
+        if (!allowed.includes(file.mimetype)) {
+          return callback(
+            new UnsupportedMediaTypeException('Only .mp4 | .webm types are allowed'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
     }),
-    fileFilter: (req, file, callback) => {
-      const allowed: string[] = ['image/jpeg', 'image/jpg', 'image/png'];
-      if (!allowed.includes(file.mimetype)) {
-        return callback(new UnsupportedMediaTypeException('File type must be .jpg | .jpeg | .png'), false);
-      }
-      callback(null, true);
-    }
-  }))
+  )
   Create(@Body() createLessonFileDto: CreateLessonFileDto, @UploadedFile() file: Express.Multer.File) {
     return this.lessonFileService.create(createLessonFileDto, file);
   }
-  
+
   @Patch(':id/update-file')
   @ApiOperation({ summary: 'Update a lesson file by ID' })
   @ApiParam({ name: 'id', type: 'string', example: '1' })

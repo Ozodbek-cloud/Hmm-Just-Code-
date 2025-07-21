@@ -140,4 +140,7 @@ export class LessonGroupsService {
     }
 
   }
+  async get_all() {
+    return await this.prismaService.lessonGroup.findMany()
+  }
 }

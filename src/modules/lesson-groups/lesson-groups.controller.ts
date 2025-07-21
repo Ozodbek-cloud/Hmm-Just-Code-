@@ -40,6 +40,14 @@ export class LessonGroupsController {
     return this.lessonGroupsService.findOne(id);
   }
 
+  @Get('all')
+  @ApiOperation({ summary: 'Get All Lesson Groups' })
+  @ApiResponse({ status: 200, description: 'Lesson group found' })
+  @ApiResponse({ status: 404, description: 'Lesson group not found' })
+  findAll() {
+    return this.lessonGroupsService.get_all();
+  }
+
   @Post('create')
   @ApiOperation({ summary: 'Create a new lesson group' })
   @ApiResponse({ status: 201, description: 'Lesson group successfully created' })
