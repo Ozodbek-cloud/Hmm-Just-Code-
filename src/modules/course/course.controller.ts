@@ -17,14 +17,6 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) { }
 
   @Get('all/courses')
-  @ApiQuery({ name: 'price_min', required: false, type: String, example: '0' })
-  @ApiQuery({ name: 'price_max', required: false, type: String, example: '100' })
-  @ApiQuery({ name: 'search', required: false, type: String, example: 'javascript' })
-  @ApiQuery({ name: 'level', required: false, enum: CourseLevel, example: 'INTERMEDIATE' })
-  @ApiQuery({ name: 'category_id', required: false, type: String, example: '1' })
-  @ApiQuery({ name: 'mentor_id', required: false, type: String, example: '5' })
-  @ApiQuery({ name: 'offset', required: false, type: String, example: '0' })
-  @ApiQuery({ name: 'limit', required: false, type: String, example: '8' })
   findAll(@Query() query: GetCoursesDto) {
     return this.courseService.findAll(query);
   }

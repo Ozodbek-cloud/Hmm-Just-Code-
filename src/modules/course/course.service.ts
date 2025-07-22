@@ -111,7 +111,7 @@ export class CourseService {
     }
 
     if (query.mentorId) {
-      filters.mentor_id = parseInt(query.mentorId);
+      filters.mentorId = parseInt(query.mentorId);
     }
 
     if (query.price_min || query.price_max) {
@@ -317,12 +317,12 @@ export class CourseService {
       filters.level = query.level;
     }
 
-    if (query.category_id) {
-      filters.category_id = parseInt(query.category_id);
+    if (query.categoryId) {
+      filters.categoryId = parseInt(query.categoryId);
     }
 
-    if (query.mentor_id) {
-      filters.mentor_id = parseInt(query.mentor_id);
+    if (query.mentorId) {
+      filters.mentorId = parseInt(query.mentorId);
     }
 
     if (query.published) {
@@ -380,12 +380,12 @@ export class CourseService {
       filters.level = query.level;
     }
 
-    if (query.category_id) {
-      filters.category_id = parseInt(query.category_id);
+    if (query.categoryId) {
+      filters.categoryId = parseInt(query.categoryId);
     }
 
-    if (query.mentor_id) {
-      filters.mentor_id = parseInt(query.mentor_id);
+    if (query.mentorId) {
+      filters.mentorId = parseInt(query.mentorId);
     }
 
     if (query.published) {
@@ -444,12 +444,12 @@ export class CourseService {
       filters.level = query.level;
     }
 
-    if (query.category_id) {
-      filters.category_id = parseInt(query.category_id);
+    if (query.categoryId) {
+      filters.categoryId = parseInt(query.categoryId);
     }
 
-    if (query.mentor_id) {
-      filters.mentor_id = parseInt(query.mentor_id);
+    if (query.mentorId) {
+      filters.mentorId = parseInt(query.mentorId);
     }
 
     if (query.published) {
@@ -562,8 +562,8 @@ export class CourseService {
       filters.level = query.level;
     }
 
-    if (query.category_id) {
-      filters.category_id = parseInt(query.category_id);
+    if (query.categoryId) {
+      filters.categoryId = parseInt(query.categoryId);
     }
 
     if (query.published) {

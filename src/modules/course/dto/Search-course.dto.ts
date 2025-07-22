@@ -70,12 +70,12 @@ export class GetOtherCoursesDto {
   @ApiPropertyOptional({ example: '1', description: 'Category ID for filtering' })
   @IsOptional()
   @IsNumberString()
-  category_id?: string;
+  categoryId?: string;
 
   @ApiPropertyOptional({ example: '5', description: 'Mentor ID for filtering' })
   @IsOptional()
   @IsNumberString()
-  mentor_id?: string;
+  mentorId?: string;
 
   @ApiPropertyOptional({ example: '0', description: 'Minimum course price' })
   @IsOptional()
@@ -124,7 +124,7 @@ export class GetOtherMentorDto {
   @ApiPropertyOptional({ example: '1', description: 'Category ID for filtering' })
   @IsOptional()
   @IsNumberString()
-  category_id?: string;
+  categoryId?: string;
 
   @ApiPropertyOptional({ example: '0', description: 'Minimum course price' })
   @IsOptional()

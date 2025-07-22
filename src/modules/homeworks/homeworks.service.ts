@@ -4,6 +4,7 @@ import { UpdateHomeworkDto } from './dto/update-homework.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import path from 'path';
 import { deleteMovieFile } from 'src/common/utils/delere-utils';
+import { GetHomeworksQueryDto, GetSubmitsQueryDto } from './dto/query.dto';
 
 @Injectable()
 export class HomeworksService {
@@ -25,21 +26,12 @@ export class HomeworksService {
     }
   }
 
-  async findAllByCourseId(courseId: string, query: any) {
-    const limit = query.limit ? parseInt(query.limit) : 10;
-    const page = query.page ? parseInt(query.page) : 1;
+  async getLessonGroupsWithHomeworks(query: GetHomeworksQueryDto) {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    const where = {
-      courseId: courseId,
-    };
-
-    const total = await this.prismaService.lessonGroup.count({ where });
-  }
-  async getLessonGroupsWithHomeworks(courseId: string, page = 1, limit = 10) {
-    const offset = (page - 1) * limit;
-
-    const where = { courseId };
+    const where = query.courseId ? { courseId: query.courseId } : {};
 
     const total = await this.prismaService.lessonGroup.count({ where });
 
@@ -53,16 +45,12 @@ export class HomeworksService {
             name: true,
             about: true,
             video: true,
-          },
-          include: {
             homework: {
               select: {
                 id: true,
                 task: true,
                 file: true,
                 lessonId: true,
-              },
-              include: {
                 homeworkSubmission: {
                   select: {
                     text: true,
@@ -81,7 +69,7 @@ export class HomeworksService {
 
     return {
       success: true,
-      message: `Successfully retrieved Homeworks for course ${courseId}`,
+      message: `Successfully retrieved homeworks${query.courseId ? ` for course ${query.courseId}` : ''}`,
       data,
       pagination: {
         total,
@@ -91,6 +79,7 @@ export class HomeworksService {
       },
     };
   }
+
 
 
   async findOne(id: number) {
@@ -128,7 +117,10 @@ export class HomeworksService {
   }
 
   async update(id: number, updateHomeworkDto: UpdateHomeworkDto, file: Express.Multer.File) {
-    let filename = file.filename
+    let filename = ''
+    if (file && file.originalname) {
+      filename = file.filename;
+    }
     let updated = await this.prismaService.homework.update({
       where: {
         id: id
@@ -163,5 +155,53 @@ export class HomeworksService {
     }
   }
 
+  async get_submits(query: GetSubmitsQueryDto) {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const where = query.lessonId ? { id: query.lessonId } : {}; 
+
+    const total = await this.prismaService.lesson.count({ where });
+
+    const data = await this.prismaService.lesson.findMany({
+      where,
+      skip: offset,
+      take: limit,
+      include: {
+        homework: {
+          select: {
+            id: true,
+            task: true,
+            file: true,
+            lessonId: true,
+            homeworkSubmission: {
+              select: {
+                text: true,
+                file: true,
+                reason: true,
+                status: true,
+                homeworkId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      success: true,
+      message: `Successfully fetched submissions`,
+      data,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+  
 
 }
+
+

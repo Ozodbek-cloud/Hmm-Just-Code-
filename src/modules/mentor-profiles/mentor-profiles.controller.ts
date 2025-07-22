@@ -9,7 +9,6 @@ import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiResponse, ApiConsumes } fr
 export class MentorProfilesController {
     constructor(private readonly mentorService: MentorProfilesService) { }
 
-
     @Get(':id/mentor-id')
     @ApiOperation({ summary: 'Get One Mentor Profile' })
     @ApiParam({ name: 'id', type: Number, description: 'Mentor profile Id', example: 1 })

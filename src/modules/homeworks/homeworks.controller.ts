@@ -7,6 +7,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { v4 as uuidv4 } from "uuid"
 import { ApiConsumes, ApiQuery } from '@nestjs/swagger';
+import { GetHomeworksQueryDto } from './dto/query.dto';
 @Controller('homeworks')
 export class HomeworksController {
   constructor(private readonly homeworksService: HomeworksService) { }
@@ -44,11 +45,9 @@ export class HomeworksController {
     return this.homeworksService.create(createHomeworkDto, file);
   }
 
-  @Get()
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  findAll(@Param('id') id: string, @Query() query: any) {
-    return this.homeworksService.findAllByCourseId(id, query);
+  @Get('all')
+  findAll(@Query() query: GetHomeworksQueryDto) {
+    return this.homeworksService.getLessonGroupsWithHomeworks(query);
   }
 
   @Get(':id/detail')
