@@ -167,7 +167,7 @@ export class ExamService {
     }
 
   }
-  async find_by_details(lesson_group_id) {
+  async find_by_details(lesson_group_id: number) {
     let detail = await this.prismaService.exam.findFirst({
       where: {
         lessonGroupId: lesson_group_id

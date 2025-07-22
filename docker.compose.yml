@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: dars4
+      POSTGRES_DB: examination_02
     ports:
       - "5431:5432"
     volumes:
@@ -20,7 +20,7 @@ services:
     container_name: my_app
     restart: always
     ports:
-      - "3005:3000"
+      - "4077:4077"
     env_file:
       - .env
     depends_on:

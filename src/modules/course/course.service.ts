@@ -2,7 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
-import { GetCoursesDto, GetOtherCoursesDto } from './dto/Search-course.dto';
+import { GetCoursesDto, GetOtherCoursesDto, GetOtherMentorDto } from './dto/Search-course.dto';
+import { CreateAssignedCourseDto } from './dto/Add-Assign.dto';
+import { deleteMovieFile } from 'src/common/utils/delere-utils';
+import path from 'path';
 
 @Injectable()
 export class CourseService {
@@ -25,6 +28,67 @@ export class CourseService {
     }
   }
 
+  async add_assign(payload: CreateAssignedCourseDto) {
+    let created = await this.prismaService.assignedCourse.create({ data: payload })
+
+    return {
+      success: true,
+      message: "Successfully Assigned to Course",
+      data: created
+    }
+  }
+  async unassign_course(assistandId: number, courseId: string) {
+    let deleted = await this.prismaService.assignedCourse.delete({
+      where: {
+        userId_courseId: {
+          userId: assistandId,
+          courseId: courseId
+        }
+      }
+    })
+    return {
+      success: true,
+      message: "Successfully UnAssigned Course",
+      data: deleted
+    }
+  }
+
+  async published(id: string) {
+    let publish = await this.prismaService.course.update({
+      where: {
+        id: id
+      },
+      data: {
+        published: true
+      }
+    })
+    if (!publish) throw new NotFoundException(`This ${id} is not Found`)
+
+    return {
+      success: true,
+      message: "Succesfully Published",
+      data: publish
+    }
+  }
+
+  async unpublished(id: string) {
+    let publish = await this.prismaService.course.update({
+      where: {
+        id: id
+      },
+      data: {
+        published: false
+      }
+    })
+    if (!publish) throw new NotFoundException(`This ${id} is not Found`)
+
+    return {
+      success: true,
+      message: "Succesfully Published",
+      data: publish
+    }
+  }
+
   async findAll(query: GetCoursesDto) {
     const limit = query.limit ? parseInt(query.limit) : 10
     const offset = query.offset ? parseInt(query.offset) : 0
@@ -34,7 +98,7 @@ export class CourseService {
     if (query.search) {
       filters.OR = [
         { name: { contains: query.search, mode: 'insensitive' } },
-        { description: { contains: query.search, mode: 'insensitive' } }
+        { about: { contains: query.search, mode: 'insensitive' } }
       ];
     }
 
@@ -42,12 +106,12 @@ export class CourseService {
       filters.level = query.level;
     }
 
-    if (query.category_id) {
-      filters.category_id = parseInt(query.category_id);
+    if (query.categoryId) {
+      filters.categoryId = parseInt(query.categoryId);
     }
 
-    if (query.mentor_id) {
-      filters.mentor_id = parseInt(query.mentor_id);
+    if (query.mentorId) {
+      filters.mentor_id = parseInt(query.mentorId);
     }
 
     if (query.price_min || query.price_max) {
@@ -245,7 +309,7 @@ export class CourseService {
     if (query.search) {
       filters.OR = [
         { name: { contains: query.search, mode: 'insensitive' } },
-        { description: { contains: query.search, mode: 'insensitive' } }
+        { about: { contains: query.search, mode: 'insensitive' } }
       ];
     }
 
@@ -261,7 +325,7 @@ export class CourseService {
       filters.mentor_id = parseInt(query.mentor_id);
     }
 
-    if(query.published) {
+    if (query.published) {
       filters.published = query.published
     }
 
@@ -308,7 +372,7 @@ export class CourseService {
     if (query.search) {
       filters.OR = [
         { name: { contains: query.search, mode: 'insensitive' } },
-        { description: { contains: query.search, mode: 'insensitive' } }
+        { about: { contains: query.search, mode: 'insensitive' } }
       ];
     }
 
@@ -324,7 +388,7 @@ export class CourseService {
       filters.mentor_id = parseInt(query.mentor_id);
     }
 
-    if(query.published) {
+    if (query.published) {
       filters.published = query.published
     }
 
@@ -362,7 +426,7 @@ export class CourseService {
       },
     };
   }
- 
+
   async findAllAsisstand(query: GetOtherCoursesDto) {
     const limit = query.limit ? parseInt(query.limit) : 10
     const offset = query.offset ? parseInt(query.offset) : 0
@@ -372,7 +436,7 @@ export class CourseService {
     if (query.search) {
       filters.OR = [
         { name: { contains: query.search, mode: 'insensitive' } },
-        { description: { contains: query.search, mode: 'insensitive' } }
+        { about: { contains: query.search, mode: 'insensitive' } }
       ];
     }
 
@@ -388,7 +452,7 @@ export class CourseService {
       filters.mentor_id = parseInt(query.mentor_id);
     }
 
-    if(query.published) {
+    if (query.published) {
       filters.published = query.published
     }
 
@@ -428,61 +492,188 @@ export class CourseService {
   }
 
   async getCourseWithAssistants(courseId: string, page = 1, limit = 10) {
-  const offset = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-  const find_course = await this.prismaService.course.findFirst({
-    where: { id: courseId },
-  });
+    const find_course = await this.prismaService.course.findFirst({
+      where: { id: courseId },
+    });
 
-  if (!find_course) {
-    throw new NotFoundException(`This ${courseId} is not found!`);
-  }
+    if (!find_course) {
+      throw new NotFoundException(`This ${courseId} is not found!`);
+    }
 
-  const assistants = await this.prismaService.assignedCourse.findMany({
-    where: { courseId },
-    skip: offset,
-    take: limit,
-    select: {
-      userId: true,
-      courseId: true,
-      users: {
-        select: {
-          fullName: true,
-          role: true,
+    const assistants = await this.prismaService.assignedCourse.findMany({
+      where: { courseId },
+      skip: offset,
+      take: limit,
+      select: {
+        userId: true,
+        courseId: true,
+        users: {
+          select: {
+            fullName: true,
+            role: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  const total = await this.prismaService.assignedCourse.count({
-    where: { courseId },
-  });
+    const total = await this.prismaService.assignedCourse.count({
+      where: { courseId },
+    });
 
-  const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / limit);
 
-  return {
-    success: true,
-    message: 'Successfully fetched course assistants with pagination',
-    data: {
-      course: find_course,
-      assistants,
-    },
-    pagination: {
-      total,
-      page,
-      limit,
-      offset,
-      pages: totalPages,
-    },
-  };
-}
-
-
-  async update(id: number, updateCourseDto: UpdateCourseDto) {
-    return `This action updates a #${id} course`;
+    return {
+      success: true,
+      message: 'Successfully fetched course assistants with pagination',
+      data: {
+        course: find_course,
+        assistants,
+      },
+      pagination: {
+        total,
+        page,
+        limit,
+        offset,
+        pages: totalPages,
+      },
+    };
   }
 
-  async remove(id: number) {
-    return `This action removes a #${id} course`;
+  async findAllMentor(query: GetOtherMentorDto) {
+    const limit = query.limit ? parseInt(query.limit) : 10
+    const offset = query.offset ? parseInt(query.offset) : 0
+
+    const filters: any = {};
+
+    if (query.id) {
+      filters.id = parseInt(query.id)
+    }
+
+    if (query.search) {
+      filters.OR = [
+        { name: { contains: query.search, mode: 'insensitive' } },
+        { about: { contains: query.search, mode: 'insensitive' } }
+      ];
+    }
+
+    if (query.level) {
+      filters.level = query.level;
+    }
+
+    if (query.category_id) {
+      filters.category_id = parseInt(query.category_id);
+    }
+
+    if (query.published) {
+      filters.published = query.published
+    }
+
+    if (query.price_min || query.price_max) {
+      filters.price = {};
+      if (query.price_min) {
+        filters.price.gte = parseFloat(query.price_min);
+      }
+      if (query.price_max) {
+        filters.price.lte = parseFloat(query.price_max);
+      }
+    }
+
+    const total = await this.prismaService.course.count({
+      where: filters,
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    const data = await this.prismaService.course.findMany({
+      where: filters,
+      skip: offset,
+      take: limit,
+    });
+
+    return {
+      success: true,
+      message: "Courses fetched successfully",
+      data,
+      pagination: {
+        total,
+        limit,
+        offset,
+        pages: totalPages,
+      },
+    };
   }
+
+  async update(id: string, payload: UpdateCourseDto, banner: Express.Multer.File, introVideo: Express.Multer.File) {
+    const course = await this.prismaService.course.findUnique({
+      where: { id },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    const banner_filename = banner?.filename || course.banner;
+    const introVideo_filename = introVideo?.filename || course.introVideo;
+
+    const updated = await this.prismaService.course.update({
+      where: { id },
+      data: {
+        ...payload,
+        banner: banner_filename,
+        introVideo: introVideo_filename,
+      },
+    });
+
+    if (banner && course.banner && course.banner !== banner.filename) {
+      const oldBannerPath = path.resolve('uploads/banners', course.banner);
+      deleteMovieFile(oldBannerPath);
+    }
+
+    if (introVideo && course.introVideo && course.introVideo !== introVideo.filename) {
+      const oldVideoPath = path.resolve('uploads/videos', course.introVideo);
+      deleteMovieFile(oldVideoPath);
+    }
+
+    return {
+      success: true,
+      message: 'Successfully Updated Course',
+      data: updated,
+    };
+  }
+  async update_mentor(courseId: string, userId: number) {
+    let updated = await this.prismaService.course.update({
+      where: {
+        id: courseId
+      },
+      data: {
+        mentorId: userId
+      }
+    })
+    if (!courseId || userId) throw new NotFoundException(`This ID not found`)
+    return {
+      success: true,
+      message: "Successfully Updated Mentor Course",
+      data: updated
+    }
+  }
+
+  async remove(id: string) {
+    let deleted = await this.prismaService.course.delete({
+      where: {
+        id: id
+      }
+    })
+    if (!deleted) throw new NotFoundException(`This ${id} is not Found`)
+
+    return {
+      success: true,
+      message: "Successfuly Deleted Course",
+      data: deleted
+    }
+  }
+
+
+
 }
