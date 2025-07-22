@@ -3,7 +3,9 @@ import { ExamService } from './exam.service';
 import { CreateExamDto, CreateManyExamsDto } from './interfaces/create-exam.dto';
 import { UpdateExamDto } from './interfaces/update-exam.dto';
 import { PassExamDto } from './interfaces/pass-the-exam.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import { Auth } from 'src/core/decorators/decorators.service';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('Exam')
 @Controller('exams')
@@ -19,6 +21,8 @@ export class ExamController {
   }
 
   @Get('lesson-group/:lessonGroupId')
+  @Auth(UserRole.STUDENT)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get exams by lesson group ID' })
   @ApiParam({ name: 'lessonGroupId', type: Number })
   @ApiResponse({ status: 200, description: 'Exam found by lesson group' })
@@ -27,6 +31,8 @@ export class ExamController {
   }
 
   @Get('detail-by-lesson-group/:lessonGroupId')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get exam details by lesson group ID' })
   @ApiParam({ name: 'lessonGroupId', type: Number })
   @ApiResponse({ status: 200, description: 'Exam with lesson group details' })
@@ -35,6 +41,8 @@ export class ExamController {
   }
 
   @Get('detail/:id')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get exam detail by exam ID' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Exam detail by ID' })
@@ -43,6 +51,8 @@ export class ExamController {
   }
 
   @Post('create/one')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create one exam' })
   @ApiResponse({ status: 201, description: 'Exam successfully created' })
   create(@Body() createExamDto: CreateExamDto) {
@@ -50,6 +60,8 @@ export class ExamController {
   }
 
   @Post('create/many')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create many exams' })
   @ApiResponse({ status: 201, description: 'Exams successfully created' })
   createMany(@Body() createManyExamsDto: CreateManyExamsDto) {
@@ -57,6 +69,8 @@ export class ExamController {
   }
 
   @Post('pass/:userId')
+  @Auth(UserRole.STUDENT)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Pass an exam by user' })
   @ApiParam({ name: 'userId', type: Number })
   @ApiResponse({ status: 200, description: 'Exam result' })
@@ -64,6 +78,8 @@ export class ExamController {
     return this.examService.passExam(dto, userId);
   }
   @Patch(':id')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update an exam by ID' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Exam successfully updated' })
@@ -72,6 +88,8 @@ export class ExamController {
   }
 
   @Delete(':id')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an exam by ID' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Exam successfully deleted' })
@@ -80,6 +98,8 @@ export class ExamController {
   }
 
   @Get('results')
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get exam results with filters and pagination' })
   @ApiQuery({ name: 'date_from', required: false, type: String, example: '2024-01-01' })
   @ApiQuery({ name: 'date_to', required: false, type: String, example: '2024-12-31' })
@@ -97,6 +117,8 @@ export class ExamController {
   }
 
   @Get('results/mentor')
+  @Auth(UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get exam results with filters and pagination for Mentor' })
   @ApiQuery({ name: 'date_from', required: false, type: String, example: '2024-01-01' })
   @ApiQuery({ name: 'date_to', required: false, type: String, example: '2024-12-31' })

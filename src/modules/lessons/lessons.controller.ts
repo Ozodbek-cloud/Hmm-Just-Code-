@@ -6,7 +6,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiResponse, ApiConsumes, } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiResponse, ApiConsumes, ApiBearerAuth, } from '@nestjs/swagger';
+import { Auth } from 'src/core/decorators/decorators.service';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('Lessons')
 @Controller('lessons')
@@ -14,6 +16,8 @@ export class LessonsController {
   constructor(private readonly lessonsService: LessonsService) { }
 
   @Post()
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('video', {
@@ -45,14 +49,27 @@ export class LessonsController {
     return this.lessonsService.create(createLessonDto, video);
   }
 
-  @Get()
+  @Get('all')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all lessons' })
   @ApiResponse({ status: 200, description: 'List of all lessons' })
   findAll() {
     return this.lessonsService.findAll();
   }
 
+  @Get(':id/detail')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get Detail OF lessons' })
+  @ApiResponse({ status: 200, description: 'Detail of all lessons' })
+  finddetail() {
+    return this.lessonsService.findAll();
+  }
+
   @Get(':id/lesson')
+  @Auth(UserRole.STUDENT)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get one lesson by ID' })
   @ApiParam({ name: 'id', required: true, description: 'Lesson ID' })
   @ApiResponse({ status: 200, description: 'Single lesson data' })
@@ -83,6 +100,8 @@ export class LessonsController {
       },
     }),
   )
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a lesson and optionally replace the video' })
   @ApiParam({ name: 'id', required: true, description: 'Lesson ID to update' })
   @ApiConsumes('multipart/from-data')
@@ -96,6 +115,8 @@ export class LessonsController {
     return this.lessonsService.update(id, updateLessonDto, video);
   }
 
+  @Auth(UserRole.STUDENT)
+  @ApiBearerAuth()
   @Put(':id/view')
   @ApiOperation({ summary: 'Turn lesson view on or off' })
   @ApiParam({ name: 'id', required: true, description: 'Lesson ID' })
@@ -110,6 +131,8 @@ export class LessonsController {
   }
 
   @Delete(':id/lesson-delete')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a lesson by ID' })
   @ApiParam({ name: 'id', required: true, description: 'Lesson ID to delete' })
   @ApiResponse({ status: 200, description: 'Lesson successfully deleted' })

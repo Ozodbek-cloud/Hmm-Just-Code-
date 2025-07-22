@@ -6,7 +6,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
-import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiParam, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
+import { Auth } from 'src/core/decorators/decorators.service';
 
 @ApiTags('Lesson Files')
 @Controller('lesson-file')
@@ -14,6 +16,8 @@ export class LessonFileController {
   constructor(private readonly lessonFileService: LessonFileService) { }
 
   @Get('all/files')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all lesson files' })
   @ApiResponse({ status: 200, description: 'All lesson files retrieved successfully' })
   FindAll() {
@@ -21,6 +25,8 @@ export class LessonFileController {
   }
 
   @Get(':id/file')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a specific lesson file by ID' })
   @ApiParam({ name: 'id', type: 'string', example: '1' })
   @ApiResponse({ status: 200, description: 'Lesson file found' })
@@ -30,6 +36,8 @@ export class LessonFileController {
   }
 
   @Post('add/file')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Upload a lesson image file with metadata' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, description: 'Lesson file successfully created' })
@@ -59,6 +67,8 @@ export class LessonFileController {
   }
 
   @Patch(':id/update-file')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a lesson file by ID' })
   @ApiParam({ name: 'id', type: 'string', example: '1' })
   @ApiBody({ type: UpdateLessonFileDto })
@@ -69,6 +79,8 @@ export class LessonFileController {
   }
 
   @Delete(':id/delete-file')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a lesson file by ID' })
   @ApiParam({ name: 'id', type: 'string', example: '1' })
   @ApiResponse({ status: 200, description: 'Lesson file deleted successfully' })

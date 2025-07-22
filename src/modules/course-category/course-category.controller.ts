@@ -1,7 +1,9 @@
 import { Controller, Post, Get, Param, Body, Patch, Delete, Put, Query } from '@nestjs/common';
 import { CourseCategoryService } from './course-category.service';
 import { CourseCategoryDto, UpdatedCourseCategoryDto } from './interfaces/course-category';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
+import { Auth } from 'src/core/decorators/decorators.service';
 
 @ApiTags('Course Categories')
 @Controller('course-categories')
@@ -27,6 +29,8 @@ export class CourseCategoryController {
   }
 
 
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
   @Post('create')
   @ApiOperation({ summary: 'Create a new course category' })
   @ApiResponse({ status: 201, description: 'Course category successfully created.' })
@@ -34,6 +38,8 @@ export class CourseCategoryController {
     return await this.categoryService.create_category(payload);
   }
 
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
   @Put(':id')
   @ApiOperation({ summary: 'Update a course category by ID' })
   @ApiResponse({ status: 200, description: 'Course category updated successfully.' })
@@ -45,6 +51,8 @@ export class CourseCategoryController {
     return await this.categoryService.update_course_category(+id, payload);
   }
 
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a course category by ID' })
   @ApiResponse({ status: 200, description: 'Course category deleted successfully.' })

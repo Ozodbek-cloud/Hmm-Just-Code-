@@ -1,7 +1,9 @@
 import { Controller, Post, Get, Delete, Param, Body, Query, Req } from '@nestjs/common';
 import { CategoryRatingService } from './category-rating.service';
 import { CreateRatingDto } from './interfaces/create-category-rating.dto';
-import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
+import { Auth } from 'src/core/decorators/decorators.service';
 
 @ApiTags('Category Ratings')
 @Controller('category-ratings')
@@ -35,6 +37,8 @@ export class CategoryRatingController {
     return this.ratingService.getAnalytics(courseId);
   }
 
+  @Auth(UserRole.STUDENT)
+  @ApiBearerAuth()
   @Post('add/rating')
   @ApiOperation({ summary: 'Create a new rating' })
   @ApiBody({ type: CreateRatingDto })
@@ -43,6 +47,8 @@ export class CategoryRatingController {
     return this.ratingService.create(req['user'].id, payload);
   }
 
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a rating by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'ID of the rating to delete' })

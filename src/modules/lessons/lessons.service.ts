@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateLessonDto } from './interfaces/create-lesson.dto';
-import { UpdateLessonDto } from './interfaces/update-lesson.dto';
+import { CreateLessonDto } from '../lessons/interfaces/create-lesson.dto';
+import { UpdateLessonDto } from '../lessons/interfaces/update-lesson.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { deleteMovieFile } from 'src/common/utils/delere-utils';
 import path from 'path';
@@ -22,6 +22,41 @@ export class LessonsService {
       success: true,
       message: "Successfully Created Lesson",
       data: created
+    }
+  }
+  async get_by_detail(id: string) {
+    let detail = await this.prismaService.lesson.findFirst({
+      where: {
+        id: id
+      },
+      include:
+      {
+        lastActivity: {
+          select: {
+            userId: true
+          }
+        },
+        lessonView: {
+          select: {
+            userId: true,
+            view: true
+          },
+        },
+        lessonFile: {
+          select: {
+            id: true,
+            file: true,
+            note: true
+          }
+        }
+      }
+    })
+    if (!detail) throw new NotFoundException(`this ${id} is not found`)
+
+    return {
+      success: true,
+      message: "Successfully Getted Details Of Lesson",
+      data: detail
     }
   }
 
@@ -130,7 +165,7 @@ export class LessonsService {
       },
       data: { view: view }
     })
-    if(!update) throw new NotFoundException(`Lesson with ID ${id} not found`)
+    if (!update) throw new NotFoundException(`Lesson with ID ${id} not found`)
 
     return {
       success: true,

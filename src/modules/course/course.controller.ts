@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UnsupportedMediaTypeException, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UnsupportedMediaTypeException, UploadedFiles, Query } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -6,7 +6,9 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from "uuid"
 import { extname } from 'path';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { GetCoursesDto } from './dto/Search-course.dto';
+import { CourseLevel } from '@prisma/client';
 
 @ApiTags('Courses')
 @Controller('course')
@@ -69,14 +71,22 @@ export class CourseController {
   }
 
 
-  @Get()
-  findAll() {
-    return this.courseService.findAll();
+  @Get('all/courses')
+  @ApiQuery({ name: 'price_min', required: false, type: String, example: '0' })
+  @ApiQuery({ name: 'price_max', required: false, type: String, example: '100' })
+  @ApiQuery({ name: 'search', required: false, type: String, example: 'javascript' })
+  @ApiQuery({ name: 'level', required: false, enum: CourseLevel, example: 'INTERMEDIATE' })
+  @ApiQuery({ name: 'category_id', required: false, type: String, example: '1' })
+  @ApiQuery({ name: 'mentor_id', required: false, type: String, example: '5' })
+  @ApiQuery({ name: 'offset', required: false, type: String, example: '0' })
+  @ApiQuery({ name: 'limit', required: false, type: String, example: '8' })
+  findAll(@Query() query: GetCoursesDto) {
+    return this.courseService.findAll(query);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.courseService.findOne(+id);
+    return this.courseService.findOne(id);
   }
 
   @Patch(':id')

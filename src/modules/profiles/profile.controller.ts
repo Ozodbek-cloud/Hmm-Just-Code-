@@ -18,7 +18,8 @@ export class profilesController {
 
     constructor(private readonly profileService: ProfileService) { }
 
-
+    @Auth(UserRole.ADMIN, UserRole.STUDENT, UserRole.MENTOR)
+    @ApiBearerAuth()
     @Get('profile')
     @ApiOperation({ summary: 'Get all profiles' })
     @ApiResponse({ status: 200, description: 'Successfully retrieved all profiles' })
@@ -28,6 +29,8 @@ export class profilesController {
         return this.profileService.get_all();
     }
 
+    @Auth(UserRole.ADMIN, UserRole.STUDENT, UserRole.MENTOR)
+    @ApiBearerAuth()
     @Get(':id/profile')
     @ApiOperation({ summary: 'Get one profile by ID' })
     @ApiParam({ name: 'id', type: Number, description: 'profile ID', example: 1 })
@@ -39,6 +42,8 @@ export class profilesController {
         return this.profileService.get_one(+id);
     }
 
+    @Auth(UserRole.ADMIN, UserRole.STUDENT, UserRole.MENTOR)
+    @ApiBearerAuth()
     @Patch(':id/update/profile')
     @ApiOperation({ summary: 'Update a profile profile' })
     @ApiConsumes('multipart/form-data')
@@ -83,6 +88,8 @@ export class profilesController {
         return this.profileService.update_profile(+id, image)
     }
 
+    @Auth(UserRole.ADMIN, UserRole.STUDENT)
+    @ApiBearerAuth()
     @Get('last-activity')
     @ApiBearerAuth()
     @Auth(UserRole.ADMIN)
@@ -93,6 +100,8 @@ export class profilesController {
         return this.profileService.getLastActivity(req['user'].id);
     }
 
+    @Auth(UserRole.ADMIN, UserRole.STUDENT)
+    @ApiBearerAuth()
     @Put('last-activity')
     @ApiBearerAuth()
     @Auth(UserRole.STUDENT, UserRole.ADMIN)
@@ -106,6 +115,8 @@ export class profilesController {
         return this.profileService.updateLastActivity(req['user'].id, dto);
     }
 
+    @Auth(UserRole.ADMIN, UserRole.STUDENT, UserRole.MENTOR)
+    @ApiBearerAuth()
     @Patch('update-phone/:id')
     @ApiOperation({ summary: 'Update user phone number via OTP' })
     @ApiResponse({ status: 200, description: 'Phone number updated successfully' })
@@ -118,6 +129,8 @@ export class profilesController {
         return this.profileService.update_phone(+profile_id, payload);
     }
 
+    @Auth(UserRole.ADMIN, UserRole.STUDENT, UserRole.MENTOR)
+    @ApiBearerAuth()
     @Patch('update-password/:id')
     @ApiOperation({ summary: 'Update user password' })
     @ApiResponse({ status: 200, description: 'Password updated successfully' })
@@ -130,6 +143,8 @@ export class profilesController {
         return this.profileService.update_password(+profile_id, payload);
     }
 
+    @Auth(UserRole.MENTOR)
+    @ApiBearerAuth()
     @Patch(':id/update/mentor')
     @ApiOperation({ summary: 'Update a Mentor profile' })
     @ApiParam({ name: 'id', type: Number, description: 'Mentor profile Id', example: 1 })

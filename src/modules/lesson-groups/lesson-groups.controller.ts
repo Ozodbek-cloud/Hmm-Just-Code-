@@ -2,13 +2,17 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, } from '@nest
 import { LessonGroupsService } from './lesson-groups.service';
 import { CreateLessonGroupDto } from './dto/create-lesson-group.dto';
 import { UpdateLessonGroupDto } from './dto/update-lesson-group.dto';
-import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiQuery, ApiBody, } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiQuery, ApiBody, ApiBearerAuth, } from '@nestjs/swagger';
+import { Auth } from 'src/core/decorators/decorators.service';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('Lesson Groups')
 @Controller('lesson-groups')
 export class LessonGroupsController {
   constructor(private readonly lessonGroupsService: LessonGroupsService) { }
   @Get('all/:course_id')
+  @Auth(UserRole.STUDENT)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get lesson groups by course ID (with optional pagination and lessons inclusion)' })
   @ApiParam({ name: 'course_id', type: String, description: 'ID of the course' })
   @ApiQuery({ name: 'offset', required: false, type: String, description: 'Number of records to skip' })
@@ -32,6 +36,8 @@ export class LessonGroupsController {
   }
 
   @Get(':id/details')
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a single lesson group by ID' })
   @ApiParam({ name: 'id', type: String, description: 'Lesson Group ID' })
   @ApiResponse({ status: 200, description: 'Lesson group found' })
@@ -49,6 +55,8 @@ export class LessonGroupsController {
   }
 
   @Post('create')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new lesson group' })
   @ApiResponse({ status: 201, description: 'Lesson group successfully created' })
   @ApiResponse({ status: 400, description: 'Invalid input or creation failed' })
@@ -57,6 +65,8 @@ export class LessonGroupsController {
   }
 
   @Patch(':id/update')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a lesson group by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'ID of the lesson group to update' })
   @ApiResponse({ status: 200, description: 'Lesson group updated successfully' })
@@ -66,6 +76,8 @@ export class LessonGroupsController {
   }
 
   @Delete(':id/delete')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a lesson group by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'ID of the lesson group to delete' })
   @ApiResponse({ status: 200, description: 'Lesson group deleted successfully' })
