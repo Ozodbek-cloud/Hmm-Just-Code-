@@ -1,13 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { SMSSendREsponse } from '../types/sms.type';
-
+import * as dotenv from "dotenv"
+dotenv.config()
 @Injectable()
 export class SmsService {
     private readonly TOKEN = process.env.SMS_TOKEN;
     private readonly $from = process.env.SMS_FROM;
     private readonly URL = process.env.SMS_URL;
-    private readonly USERNAME = process.env.SMS_LOGIN;
+    private readonly USERNAME = process.env.SMS_USERNAME;
     private readonly CALLBACK_URL = process.env.CALLBACK_URL
 
     private $axios = axios.create(
@@ -24,6 +25,7 @@ export class SmsService {
                     password: this.TOKEN
                 }
             );
+            console.log(data)
             await this.$axios.post<SMSSendREsponse>('/message/sms/send',
                 {
                     from : this.$from,

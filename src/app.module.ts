@@ -8,9 +8,10 @@ import { LessonFileModule } from './modules/lesson-file/lesson-file.module';
 import { ExamModule } from './modules/exam/exam.module';
 import { UsersModule } from './modules/users/users.module';
 import { CourseModule } from './modules/course/course.module';
+import { HomeworksModule } from './modules/homeworks/homeworks.module';
 
 
 @Module({
-  imports: [ConfigModule, LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, UsersModule, CourseModule],
+  imports: [ConfigModule, LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, UsersModule, CourseModule, HomeworksModule],
 })
 export class AppModule {}
