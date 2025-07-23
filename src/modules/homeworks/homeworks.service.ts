@@ -4,7 +4,8 @@ import { UpdateHomeworkDto } from './dto/update-homework.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import path from 'path';
 import { deleteMovieFile } from 'src/common/utils/delere-utils';
-import { GetHomeworksQueryDto, GetSubmitsQueryDto } from './dto/query.dto';
+import { GetHomeworksQueryDto, GetSubmitQueryDto, GetSubmitsQueryDto } from './dto/query.dto';
+import { CheckDto, SubmissionDto } from './dto/submission.dto';
 
 @Injectable()
 export class HomeworksService {
@@ -159,7 +160,7 @@ export class HomeworksService {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const offset = (page - 1) * limit;
-    const where = query.lessonId ? { id: query.lessonId } : {}; 
+    const where = query.lessonId ? { id: query.lessonId } : {};
 
     const total = await this.prismaService.lesson.count({ where });
 
@@ -200,7 +201,141 @@ export class HomeworksService {
       },
     };
   }
-  
+
+  async subit_submission(user_id: number, lessonId: string, payload: SubmissionDto) {
+    let find_one = await this.prismaService.homework.findFirst({
+      where: {
+        lessonId: lessonId
+      }
+    })
+    let submit = await this.prismaService.homeworkSubmission.create({
+      data: {
+        file: payload.file,
+        text: payload.text,
+        homeworkId: find_one!.id,
+        userId: user_id
+      }
+    })
+    if (!find_one) throw new NotFoundException(`This ${lessonId} is not found`)
+
+    return {
+      success: true,
+      message: "Successfully Sumbitted Homework",
+      data: {
+        lessonId: lessonId,
+        userId: user_id,
+        homeworkId: submit.homeworkId,
+        file: submit.file,
+        text: submit.text
+      }
+    }
+  }
+
+  async get_submissions(query: GetSubmitQueryDto) {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const where = query.courseId ? { id: query.courseId } : {};
+
+    const total = await this.prismaService.lesson.count({ where });
+
+    const data = await this.prismaService.lesson.findMany({
+      where,
+      skip: offset,
+      take: limit,
+      include: {
+        homework: {
+          select: {
+            id: true,
+            task: true,
+            file: true,
+            lessonId: true,
+            homeworkSubmission: {
+              select: {
+                text: true,
+                file: true,
+                reason: true,
+                status: true,
+                homeworkId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      success: true,
+      message: `Successfully fetched submissions`,
+      data,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+  async single(id: number) {
+    let one = await this.prismaService.homeworkSubmission.findFirst({
+      where: {
+        id: id
+      },
+      include: {
+        homeworks: {
+          select: {
+            task: true,
+            file: true,
+            lessonId: true
+          }
+        },
+        users: {
+          select: {
+            fullName: true,
+            phone: true,
+            image: true
+          }
+        }
+      },
+    })
+    if (!one) throw new NotFoundException(`This ${id} is not found`)
+
+    return {
+      success: true,
+      message: "Successfully Getted One Submission",
+      data: one
+    }
+  }
+  async check(submissionId: number, payload: CheckDto) {
+    if (payload.approved === true) {
+      const updated = await this.prismaService.homeworkSubmission.update({
+        where: { id: submissionId },
+        data: {
+          ...payload,
+          status: 'APPROVED',
+        },
+      });
+      return {
+        success: true,
+        message: "Successfully Checked Submission",
+        data: updated
+      };
+    } else if (payload.approved == false) {
+      const updated = await this.prismaService.homeworkSubmission.update({
+        where: { id: submissionId },
+        data: {
+          ...payload,
+          status: 'REJECTED',
+        },
+      });
+      return {
+        success: true,
+        message: "Successfully Checked Submission",
+        data: updated
+      };
+    }
+  }
+
 
 }
 
