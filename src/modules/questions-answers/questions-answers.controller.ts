@@ -1,65 +1,89 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UnsupportedMediaTypeException, Req } from '@nestjs/common';
-import { QuestionsAnswersService } from './questions-answers.service';
-import { UpdateQuestionsAnswerDto } from './dto/update-questions-answer.dto';
+import {  Controller,  Get,  Post,  Body,  Param,  Delete,  Put,  Query,  UploadedFile,  UseInterceptors,  ParseIntPipe, Patch,} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import {v4 as uuidv4} from "uuid"
-import { extname } from 'path';
-import { CreateQuestionsDto } from './dto/create-questions-answer.dto';
+import { QuestionsAnswersService } from './questions-answers.service';
+import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { CreateQuestionAnswerDto, CreateQuestionsDto } from './dto/create-questions-answer.dto';
+import { UpdateQuestionsAnswerDto } from './dto/update-questions-answer.dto';
+import { GetQuestionsAnswerQueryDto } from './dto/query-dto';
 
+@ApiTags('Questions & Answers')
 @Controller('questions-answers')
 export class QuestionsAnswersController {
-  constructor(private readonly questionsAnswersService: QuestionsAnswersService) { }
+  constructor(private readonly service: QuestionsAnswersService) {}
 
-  @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads/file',
-        filename: (req, file, cb) => {
-          const fileName = uuidv4() + extname(file.originalname);
-          cb(null, fileName);
-        },
-      }),
-      fileFilter: (req, file, callback) => {
-        const allowed = [
-          'application/pdf',
-          'application/zip',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'text/plain',
-        ];
-        if (!allowed.includes(file.mimetype)) {
-          return callback(
-            new UnsupportedMediaTypeException('Only PDF, DOCX, ZIP, XLSX, TXT types are allowed'),
-            false,
-          );
-        }
-        callback(null, true);
-      },
-    }),
-  )
-  create(@Body() createQuestionsAnswerDto: CreateQuestionsDto,@Req() req: Request, @Param('courseId')  courseId: string, file : Express.Multer.File) {
-    return this.questionsAnswersService.create_question(req['user'].id, courseId, createQuestionsAnswerDto, file);
+  @Get('mine')
+  @ApiOperation({ summary: 'Get my questions by courseId and read status' })
+  findMine(@Query() query: GetQuestionsAnswerQueryDto) {
+    return this.service.findmine(query);
   }
 
-  @Get()
-  findAll() {
-    return this.questionsAnswersService.findAll();
+  @Get('by-course')
+  findCourse(@Query() query: GetQuestionsAnswerQueryDto) {
+    return this.service.find_courseId(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.questionsAnswersService.findOne(+id);
+  @Get(':id/single')
+  @ApiOperation({ summary: 'Get one question by ID' })
+  @ApiParam({ name: 'id', type: Number })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.service.findOne(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateQuestionsAnswerDto: UpdateQuestionsAnswerDto) {
-  //   return this.questionsAnswersService.update(+id, updateQuestionsAnswerDto);
-  // }
+  @Post(':id/read')
+  @ApiOperation({ summary: 'Mark question as read' })
+  @ApiParam({ name: 'id'})
+  read(@Param('id') id: number) {
+    return this.service.read(id);
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.questionsAnswersService.remove(+id);
-  // }
+  @Post(':userId/:courseId')
+  @ApiOperation({ summary: 'Create question with file upload' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'userId', type: Number })
+  @ApiParam({ name: 'courseId', type: String })
+  @ApiBody({
+    type: CreateQuestionsDto,
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  createQuestion(@Param('userId', ParseIntPipe) userId: number,@Param('courseId') courseId: string,@Body() body: CreateQuestionsDto,@UploadedFile() file: Express.Multer.File){
+    return this.service.create_question(userId, courseId, body, file);
+  }
+
+  @Patch(':id/question')
+  @ApiOperation({ summary: 'Update question' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'id', type: Number })
+  @UseInterceptors(FileInterceptor('file'))updateQuestion(  @Param('id', ParseIntPipe) id: number,  @Body() body: CreateQuestionsDto,  @UploadedFile() file: Express.Multer.File,) {
+    return this.service.update_question(id, body, file);
+  }
+
+  @Post('answer/:userId/:questionId')
+  @ApiOperation({ summary: 'Create question answer' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'userId', type: Number })
+  @ApiParam({ name: 'questionId', type: Number })
+  @UseInterceptors(FileInterceptor('file'))createAnswer(  @Param('userId', ParseIntPipe) userId: number,  @Param('questionId', ParseIntPipe) questionId: number,  @Body() body: CreateQuestionAnswerDto,  @UploadedFile() file: Express.Multer.File,) {
+    return this.service.create_question_answer(userId, questionId, body, file);
+  }
+
+  @Patch('answer/:id')
+  @ApiOperation({ summary: 'Update question answer' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'id', type: Number }) @UseInterceptors(FileInterceptor('file')) updateAnswer(   @Param('id', ParseIntPipe) id: number,   @Body() body: UpdateQuestionsAnswerDto,   @UploadedFile() file: Express.Multer.File, ) {
+    return this.service.update(id, body, file);
+  }
+
+  @Delete(':id/delete')
+  @ApiOperation({ summary: 'Delete question by ID' })
+  @ApiParam({ name: 'id', type: Number })
+  deleteQuestion(@Param('id', ParseIntPipe) id: number) {
+    return this.service.question_remove(id);
+  }
+
+  @Delete('answer/:id')
+  @ApiOperation({ summary: 'Delete question answer by ID' })
+  @ApiParam({ name: 'id', type: Number })
+  deleteAnswer(@Param('id', ParseIntPipe) id: number) {
+    return this.service.question_answer_remove(id);
+  }
 }

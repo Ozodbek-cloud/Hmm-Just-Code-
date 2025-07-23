@@ -4,17 +4,157 @@ import { UpdateQuestionsAnswerDto } from './dto/update-questions-answer.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import path from 'path';
 import { deleteMovieFile } from 'src/common/utils/delere-utils';
+import { GetQuestionsAnswerQueryDto } from './dto/query-dto';
 
 @Injectable()
 export class QuestionsAnswersService {
   constructor(private prismaService: PrismaService) { }
 
-  async findAll() {
-    return `This action returns all questionsAnswers`;
+  async findmine(query: GetQuestionsAnswerQueryDto) {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const where = query.courseId && query.read ? { courseId: query.courseId, read: query.read } : {};
+
+    const total = await this.prismaService.question.count({ where });
+
+    const data = await this.prismaService.question.findMany({
+      where,
+      skip: offset,
+      take: limit,
+      include: {
+        courses: {
+          select: {
+            name: true,
+            about: true,
+            price: true,
+            banner: true,
+            introVideo: true,
+            level: true,
+            published: true,
+            assignedCourses: {
+              select: {
+                userId: true
+              }
+            }
+          },
+
+        },
+        users: {
+          select: {
+            fullName: true,
+            role: true
+          }
+        }
+
+      }
+    });
+
+    return {
+      success: true,
+      message: `Successfully fetched submissions`,
+      data,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async find_courseId(query: GetQuestionsAnswerQueryDto) {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const where = query.courseId && query.read ? { courseId: query.courseId, read: query.read } : {};
+
+    const total = await this.prismaService.question.count({ where });
+
+    const data = await this.prismaService.question.findMany({
+      where,
+      skip: offset,
+      take: limit,
+      include: {
+        courses: {
+          select: {
+            name: true,
+            about: true,
+            price: true,
+            banner: true,
+            introVideo: true,
+            level: true,
+            published: true,
+            assignedCourses: {
+              select: {
+                userId: true
+              }
+            }
+          },
+
+        },
+        users: {
+          select: {
+            fullName: true,
+            role: true
+          }
+        }
+
+      }
+    });
+
+    return {
+      success: true,
+      message: `Successfully fetched submissions`,
+      data,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findOne(id: number) {
-    return `This action returns a #${id} questionsAnswer`;
+    let find_one = await this.prismaService.question.findFirst({
+      where: {
+        id: id
+      },
+      include: {
+        questionAnswer: {
+          select: {
+            questionId: true,
+            userId: true,
+            text: true,
+            file: true
+          }
+        },
+        users: {
+          select: {
+            fullName: true,
+            image: true
+          }
+        },
+        courses: {
+          select: {
+            name: true,
+            about: true,
+            banner: true,
+            price: true,
+            level: true,
+            published: true
+          }
+        }
+      }
+    })
+    if (!find_one) throw new NotFoundException(`This ${id} is not found`)
+
+    return {
+      success: true,
+      message: "Successfully Getted One Questiion",
+      data: find_one
+    }
   }
 
   async read(id: number) {

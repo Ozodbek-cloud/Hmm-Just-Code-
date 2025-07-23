@@ -10,9 +10,10 @@ import { UsersModule } from './modules/users/users.module';
 import { CourseModule } from './modules/course/course.module';
 import { HomeworksModule } from './modules/homeworks/homeworks.module';
 import { QuestionsAnswersModule } from './modules/questions-answers/questions-answers.module';
+import { PurchasedCoursesModule } from './modules/purchased-courses/purchased-courses.module';
 
 
 @Module({
-  imports: [ConfigModule, LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, UsersModule, CourseModule, HomeworksModule, QuestionsAnswersModule],
+  imports: [ConfigModule, LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, UsersModule, CourseModule, HomeworksModule, QuestionsAnswersModule, PurchasedCoursesModule],
 })
 export class AppModule {}
