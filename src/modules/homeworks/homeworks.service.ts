@@ -307,27 +307,16 @@ export class HomeworksService {
     }
   }
   async check(submissionId: number, payload: CheckDto) {
-    if (payload.approved === true) {
+      const { approved} = payload 
+
       const updated = await this.prismaService.homeworkSubmission.update({
         where: { id: submissionId },
         data: {
           ...payload,
-          status: 'APPROVED',
+          status: approved ? 'APPROVED' : 'REJECTED',
         },
       });
-      return {
-        success: true,
-        message: "Successfully Checked Submission",
-        data: updated
-      };
-    } else if (payload.approved == false) {
-      const updated = await this.prismaService.homeworkSubmission.update({
-        where: { id: submissionId },
-        data: {
-          ...payload,
-          status: 'REJECTED',
-        },
-      });
+      
       return {
         success: true,
         message: "Successfully Checked Submission",
@@ -337,6 +326,6 @@ export class HomeworksService {
   }
 
 
-}
+
 
 

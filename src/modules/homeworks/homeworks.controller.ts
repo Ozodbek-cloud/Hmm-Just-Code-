@@ -6,9 +6,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { v4 as uuidv4 } from "uuid"
-import { ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { GetHomeworksQueryDto, GetSubmitsQueryDto } from './dto/query.dto';
 import { CheckDto, SubmissionDto } from './dto/submission.dto';
+import { Auth } from 'src/core/decorators/decorators.service';
+import { UserRole } from '@prisma/client';
 @Controller('homeworks')
 export class HomeworksController {
   constructor(private readonly homeworksService: HomeworksService) { }
@@ -98,10 +100,12 @@ export class HomeworksController {
   @ApiOperation({ summary: 'Get my homework submission by lessonId (Student)' })
   @ApiParam({ name: 'lessonId', type: String })
   @ApiResponse({ status: 200, description: 'Successfully fetched submission' })
-  getMySubmission(@Param('lessonId') lessonId: string) {
-    return this.homeworksService.get_submissions(lessonId);
+  getMySubmission(@Query() query : GetSubmitsQueryDto) {
+    return this.homeworksService.get_submissions(query);
   }
 
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
   @Post('submission/submit/:lessonId')
   @ApiOperation({ summary: 'Submit homework for a lesson (Student)' })
   @ApiParam({ name: 'lessonId', type: String })

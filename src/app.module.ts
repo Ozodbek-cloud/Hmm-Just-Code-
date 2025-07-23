@@ -9,9 +9,10 @@ import { ExamModule } from './modules/exam/exam.module';
 import { UsersModule } from './modules/users/users.module';
 import { CourseModule } from './modules/course/course.module';
 import { HomeworksModule } from './modules/homeworks/homeworks.module';
+import { QuestionsAnswersModule } from './modules/questions-answers/questions-answers.module';
 
 
 @Module({
-  imports: [ConfigModule, LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, UsersModule, CourseModule, HomeworksModule],
+  imports: [ConfigModule, LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, UsersModule, CourseModule, HomeworksModule, QuestionsAnswersModule],
 })
 export class AppModule {}

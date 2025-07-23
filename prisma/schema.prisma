@@ -232,7 +232,7 @@ model HomeworkSubmission {
   userId     Int
   updatedAt  DateTime?
   createdAt  DateTime          @default(now())
-
+  approved  Boolean?
   homeworks Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
   users     Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
