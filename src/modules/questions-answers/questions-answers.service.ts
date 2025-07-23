@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateQuestionAnswerDto, CreateQuestionsDto } from './dto/create-questions-answer.dto';
 import { UpdateQuestionsAnswerDto } from './dto/update-questions-answer.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import path from 'path';
+import { deleteMovieFile } from 'src/common/utils/delere-utils';
 
 @Injectable()
 export class QuestionsAnswersService {
@@ -16,12 +18,14 @@ export class QuestionsAnswersService {
   }
 
   async read(id: number) {
+    let readat = Date.now()
     let readed = await this.prismaService.question.update({
       where: {
         id: id
       },
       data: {
-        read: true
+        read: true,
+        readAt: readat.toString()
       }
     })
     if (!readed) throw new NotFoundException(`This ${id} not found`)
@@ -64,6 +68,11 @@ export class QuestionsAnswersService {
     })
     if (!id) throw new NotFoundException("ID is not found")
 
+    if (file && created.file && created.file !== file.filename) {
+      const oldBannerPath = path.resolve('uploads/file', created.file);
+      deleteMovieFile(oldBannerPath);
+    }
+
     return {
       success: true,
       message: "Successfully Updated Question",
@@ -101,6 +110,11 @@ export class QuestionsAnswersService {
       }
     })
     if (!data) throw new NotFoundException(`This ${id} is not found`)
+
+    if (file && data.file && data.file !== file.filename) {
+      const oldBannerPath = path.resolve('uploads/file', data.file);
+      deleteMovieFile(oldBannerPath);
+    }
 
     return {
       success: true,
