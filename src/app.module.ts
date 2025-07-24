@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { InternalServerErrorException, Module } from '@nestjs/common';
 import { ConfigModule } from './common/config/config.module';
 import { LastActivityModule } from './modules/last-activity/last-activity.module';
 import { CategoryRatingModule } from './modules/category-rating/category-rating.module';
@@ -17,3 +17,5 @@ import { PurchasedCoursesModule } from './modules/purchased-courses/purchased-co
   imports: [ConfigModule, LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, UsersModule, CourseModule, HomeworksModule, QuestionsAnswersModule, PurchasedCoursesModule],
 })
 export class AppModule {}
+
+

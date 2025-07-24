@@ -32,7 +32,7 @@ export class ProfileService {
             if (error.code === 'P2025') {
                 throw new NotFoundException(`User with ID ${id} not found`);
             }
-            throw new InternalServerErrorException(`Error updating user: ${error.message}`);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
@@ -46,7 +46,7 @@ export class ProfileService {
                 data: all,
             };
         } catch (error) {
-            throw new InternalServerErrorException(`Error retrieving users: ${error.message}`);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
@@ -67,7 +67,7 @@ export class ProfileService {
             };
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
-            throw new InternalServerErrorException(`Error retrieving user: ${error.message}`);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
@@ -106,87 +106,105 @@ export class ProfileService {
             if (error.code === 'P2025') {
                 throw new NotFoundException(`User with ID ${user_id} not found`);
             }
-            throw new InternalServerErrorException(`Telefon raqamni yangilashda xatolik: ${error.message}`);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
     async getLastActivity(userId: number) {
-        const activity = await this.prismaService.lastActivity.findUnique({
-            where: { userId },
-        });
+        try {
+            const activity = await this.prismaService.lastActivity.findUnique({
+                where: { userId },
+            });
 
-        if (!activity) {
-            throw new NotFoundException(`Last activity not found for user ID ${userId}`);
+            if (!activity) {
+                throw new NotFoundException(`Last activity not found for user ID ${userId}`);
+            }
+
+            return {
+                success: true,
+                message: 'Last activity retrieved successfully',
+                data: activity,
+            };
+        } catch (error) {
+            if (error.code === 'P2025') {
+                throw new NotFoundException(`User with ID ${userId} not found`);
+            }
+            throw new InternalServerErrorException(error.message);
         }
-
-        return {
-            success: true,
-            message: 'Last activity retrieved successfully',
-            data: activity,
-        };
     }
 
     async updateLastActivity(userId: number, dto: UpdateLastActivityDto) {
-        const existing = await this.prismaService.lastActivity.findUnique({
-            where: { userId },
-        });
-
-        if (!existing) {
-            const created = await this.prismaService.lastActivity.create({
-                data: {
-                    userId,
-                    ...dto,
-                },
+        try {
+            const existing = await this.prismaService.lastActivity.findUnique({
+                where: { userId },
             });
+
+            if (!existing) {
+                const created = await this.prismaService.lastActivity.create({
+                    data: {
+                        userId,
+                        ...dto,
+                    },
+                });
+                return {
+                    success: true,
+                    message: 'Last activity created successfully',
+                    data: created,
+                };
+            }
+
+            const updated = await this.prismaService.lastActivity.update({
+                where: { userId },
+                data: dto,
+            });
+
             return {
                 success: true,
-                message: 'Last activity created successfully',
-                data: created,
+                message: 'Last activity updated successfully',
+                data: updated,
             };
+        } catch (error) {
+            if (error.code === 'P2025') {
+                throw new NotFoundException(`User with ID ${userId} not found`);
+            }
+            throw new InternalServerErrorException(error.message);
         }
-
-        const updated = await this.prismaService.lastActivity.update({
-            where: { userId },
-            data: dto,
-        });
-
-        return {
-            success: true,
-            message: 'Last activity updated successfully',
-            data: updated,
-        };
     }
 
     async update_password(user_id: number, payload: Updated_Password) {
-        const { password, newPassword } = payload;
+        try {
+            const { password, newPassword } = payload;
 
-        const one_user = await this.prismaService.users.findFirst({
-            where: { id: user_id },
-        });
+            const one_user = await this.prismaService.users.findFirst({
+                where: { id: user_id },
+            });
 
-        if (!one_user) {
-            throw new NotFoundException(`User with ID ${user_id} not found`);
+            if (!one_user) {
+                throw new NotFoundException(`User with ID ${user_id} not found`);
+            }
+
+            const isMatch = await bcrypt.compare(password, one_user.password);
+            if (!isMatch) {
+                throw new BadRequestException(`Current password is incorrect`);
+            }
+
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            const updated = await this.prismaService.users.update({
+                where: { id: user_id },
+                data: {
+                    password: hashedPassword,
+                },
+            });
+
+            return {
+                success: true,
+                message: 'Password successfully updated',
+                data: updated,
+            };
+        } catch (error) {
+           throw new InternalServerErrorException(error.message)
         }
-
-        const isMatch = await bcrypt.compare(password, one_user.password);
-        if (!isMatch) {
-            throw new BadRequestException(`Current password is incorrect`);
-        }
-
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-        const updated = await this.prismaService.users.update({
-            where: { id: user_id },
-            data: {
-                password: hashedPassword,
-            },
-        });
-
-        return {
-            success: true,
-            message: 'Password successfully updated',
-            data: updated,
-        };
     }
 
     async update(id: number, payload: Partial<Update_Mentor_ProfileDto>) {

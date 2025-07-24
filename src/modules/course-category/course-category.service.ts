@@ -18,7 +18,7 @@ export class CourseCategoryService {
                 data: created,
             };
         } catch (error) {
-            throw new InternalServerErrorException(`Error creating course category: ${error.message}`);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
@@ -61,86 +61,82 @@ export class CourseCategoryService {
                 },
             };
         } catch (error) {
-            console.error('Error in get_all_course_category:', error);
-            return {
-                success: false,
-                message: 'Failed to retrieve Course Categories',
-                data: [],
-            };
+            throw new InternalServerErrorException(error.message);
+
         }
     }
 
 
     async get_one_course_category(id: number) {
-    try {
-        const one = await this.prismaService.courseCategory.findFirst({
-            where: { id },
-            include: {
-                courses: {
-                    select: {
-                        name: true,
-                        about: true,
-                        price: true,
-                        banner: true,
-                        introVideo: true,
-                        level: true,
-                        published: true,
+        try {
+            const one = await this.prismaService.courseCategory.findFirst({
+                where: { id },
+                include: {
+                    courses: {
+                        select: {
+                            name: true,
+                            about: true,
+                            price: true,
+                            banner: true,
+                            introVideo: true,
+                            level: true,
+                            published: true,
+                        },
                     },
                 },
-            },
-        });
+            });
 
-        if (!one) {
-            throw new NotFoundException(`Course category with ID ${id} not found`);
+            if (!one) {
+                throw new NotFoundException(`Course category with ID ${id} not found`);
+            }
+
+            return {
+                success: true,
+                message: "Successfully Retrieved One Course Category",
+                data: one,
+            };
+        } catch (error) {
+            if (error instanceof NotFoundException) throw error;
+            throw new InternalServerErrorException(error.message);
         }
-
-        return {
-            success: true,
-            message: "Successfully Retrieved One Course Category",
-            data: one,
-        };
-    } catch (error) {
-        if (error instanceof NotFoundException) throw error;
-        throw new InternalServerErrorException(`Error retrieving course category: ${error.message}`);
     }
-}
 
     async update_course_category(id: number, payload: UpdatedCourseCategoryDto) {
-    try {
-        const updated = await this.prismaService.courseCategory.update({
-            where: { id },
-            data: payload,
-        });
+        try {
+            const updated = await this.prismaService.courseCategory.update({
+                where: { id },
+                data: payload,
+            });
 
-        return {
-            success: true,
-            message: "Successfully Updated Course Category",
-            data: updated,
-        };
-    } catch (error) {
-        if (error.code === 'P2025') {
-            throw new NotFoundException(`Course category with ID ${id} not found`);
+            return {
+                success: true,
+                message: "Successfully Updated Course Category",
+                data: updated,
+            };
+        } catch (error) {
+            if (error.code === 'P2025') {
+                throw new NotFoundException(`Course category with ID ${id} not found`);
+            }
+            throw new InternalServerErrorException(error.message);
         }
-        throw new InternalServerErrorException(`Error updating course category: ${error.message}`);
     }
-}
 
     async delete_course_category(id: number) {
-    try {
-        const deleted = await this.prismaService.courseCategory.delete({
-            where: { id },
-        });
+        try {
+            const deleted = await this.prismaService.courseCategory.delete({
+                where: { id },
+            });
 
-        return {
-            success: true,
-            message: "Successfully Deleted Course Category",
-            data: deleted,
-        };
-    } catch (error) {
-        if (error.code === 'P2025') {
-            throw new NotFoundException(`Course category with ID ${id} not found`);
+            return {
+                success: true,
+                message: "Successfully Deleted Course Category",
+                data: deleted,
+            };
+        } catch (error) {
+            if (error.code === 'P2025') {
+                throw new NotFoundException(`Course category with ID ${id} not found`);
+            }
+            throw new InternalServerErrorException(error.message);
         }
-        throw new InternalServerErrorException(`Error deleting course category: ${error.message}`);
     }
-}
 }

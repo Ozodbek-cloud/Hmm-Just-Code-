@@ -1,72 +1,81 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreatePurchasedCourseDto } from './dto/create-purchased-course.dto';
 import { UpdatePurchasedCourseDto } from './dto/update-purchased-course.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import { PaidVia } from '@prisma/client';
+import { GetCoursesQueryDto } from './dto/query-dto';
 
 @Injectable()
 export class PurchasedCoursesService {
-  constructor(private PrismaService: PrismaService) {}
-  
-  create(createPurchasedCourseDto: CreatePurchasedCourseDto) {
-    return 'This action adds a new purchasedCourse';
-  }
+  constructor(private prismaService: PrismaService) { }
 
-  async findAll(query: any) {
-    const limit = query.limit ? parseInt(query.limit) : 10
-    const offset = query.offset ? parseInt(query.offset) : 0
+  async purchaseCourse(courseId: string, userId: number) {
+    try {
+      const course = await this.prismaService.course.findUnique({ where: { id: courseId } });
+      if (!course) throw new NotFoundException('Kurs topilmadi');
 
-    const filters: any = {};
-
-    if (query.search) {
-      filters.OR = [
-        { name: { contains: query.search, mode: 'insensitive' } },
-        { about: { contains: query.search, mode: 'insensitive' } }
-      ];
-    }
-
-    if (query.level) {
-      filters.level = query.level;
-    }
-
-    if (query.categoryId) {
-      filters.categoryId = parseInt(query.categoryId);
-    }
-
-
-    const total = await this.prismaService.course.count({
-      where: filters,
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
-    const data = await this.prismaService.course.findMany({
-      where: filters,
-      skip: offset,
-      take: limit,
-    });
-
-    return {
-      success: true,
-      message: "Courses fetched successfully",
-      data,
-      pagination: {
-        total,
-        limit,
-        offset,
-        pages: totalPages,
-      },
+      let created = await this.prismaService.purchasedCourse.create({
+        data: {
+          courseId,
+          userId,
+          amount: course.price,
+          paidVia: PaidVia.PAYME,
+        },
+      });
+      return {
+        success: true,
+        message: "Successfully Created Purchased",
+        data: created
+      }
+    } catch (error) {
+      throw new BadRequestException(error.message)
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} purchasedCourse`;
+  async getAll(userId: number, query: GetCoursesQueryDto) {
+    try {
+      let all = await this.prismaService.purchasedCourse.findMany({
+        where: {
+          userId,
+          courses: {
+            name: { contains: query.search },
+            categoryId: query.categoryId,
+            level: query.level,
+          },
+        },
+        skip: query.offset,
+        take: query.limit,
+        include: { courses: true },
+      });
+
+      return {
+        success: true,
+        message: "Successfully Getted All Purchased Courses",
+        data: all,
+      }
+    } catch (error) {
+      throw new BadRequestException(error.message)
+    }
   }
 
-  update(id: number, updatePurchasedCourseDto: UpdatePurchasedCourseDto) {
-    return `This action updates a #${id} purchasedCourse`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} purchasedCourse`;
+  async getOne(courseId: string, userId: number) {
+    try {
+      const purchased = await this.prismaService.purchasedCourse.findUnique({
+        where: {
+          courseId_userId: {
+            courseId,
+            userId,
+          },
+        },
+      });
+      if (!purchased) throw new NotFoundException('Kurs sotib olinmagan');
+      return {
+        success: true,
+        message: "Successfully Getted Purchased",
+        data: purchased
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message)
+    }
   }
 }

@@ -17,7 +17,7 @@ export class MentorProfilesService {
                 data: all,
             };
         } catch (error) {
-            throw new InternalServerErrorException(`Error retrieving all mentor profiles: ${error.message}`);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
@@ -38,7 +38,7 @@ export class MentorProfilesService {
             };
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
-            throw new InternalServerErrorException(`Error retrieving mentor by ID: ${error.message}`);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
@@ -59,7 +59,7 @@ export class MentorProfilesService {
             };
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
-            throw new InternalServerErrorException(`Error retrieving mentors by job: ${error.message}`);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
@@ -80,7 +80,7 @@ export class MentorProfilesService {
             };
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
-            throw new InternalServerErrorException(`Error retrieving mentors by experience: ${error.message}`);
+            throw new InternalServerErrorException(error.message);
         }
     }
 }
