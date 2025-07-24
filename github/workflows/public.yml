@@ -19,8 +19,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             echo "Creating project folder if it doesn't exist"
-            mkdir -p /home/ubuntu/nest_dars
-            cd /home/ubuntu/nest_dars
+            mkdir -p /home/ubuntu/examination
+            cd /home/ubuntu/examination
 
             if [ ! -d .git ]; then
               echo "Cloning repository"
