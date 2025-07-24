@@ -45,7 +45,7 @@ model Users {
   id        Int      @id @default(autoincrement())
   phone     String   @unique
   password  String
-  image      String?
+  image     String?
   role      UserRole @default(STUDENT)
   fullName  String
   createdAt DateTime @default(now())
@@ -75,9 +75,9 @@ model MentorProfile {
   github     String?
   website    String?
 
-  user_id Int   @unique
+  user_id Int @unique
 
-  users   Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  users Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model CourseCategory {
@@ -232,9 +232,9 @@ model HomeworkSubmission {
   userId     Int
   updatedAt  DateTime?
   createdAt  DateTime          @default(now())
-  approved  Boolean?
-  homeworks Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
-  users     Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approved   Boolean?
+  homeworks  Homework          @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  users      Users             @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Exam {
@@ -292,4 +292,10 @@ model QuestionAnswer {
 
   questions Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   users     Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Contact {
+  id       Int    @id @default(autoincrement())
+  fullName String
+  message    String
 }

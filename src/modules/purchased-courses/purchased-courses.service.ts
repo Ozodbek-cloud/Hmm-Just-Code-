@@ -32,31 +32,20 @@ export class PurchasedCoursesService {
     }
   }
 
-  async getAll(userId: number, query: GetCoursesQueryDto) {
-    try {
-      let all = await this.prismaService.purchasedCourse.findMany({
-        where: {
-          userId,
-          courses: {
-            name: { contains: query.search },
-            categoryId: query.categoryId,
-            level: query.level,
-          },
-        },
-        skip: query.offset,
-        take: query.limit,
-        include: { courses: true },
-      });
+  // async getAll(userId: number, query: GetCoursesQueryDto) {
+  //   try {
 
-      return {
-        success: true,
-        message: "Successfully Getted All Purchased Courses",
-        data: all,
-      }
-    } catch (error) {
-      throw new BadRequestException(error.message)
-    }
-  }
+
+
+  //     return {
+  //       success: true,
+  //       message: "Successfully Getted All Purchased Courses",
+  //       data: all,
+  //     }
+  //   } catch (error) {
+  //     throw new BadRequestException(error.message)
+  //   }
+  // }
 
   async getOne(courseId: string, userId: number) {
     try {
@@ -67,6 +56,23 @@ export class PurchasedCoursesService {
             userId,
           },
         },
+        include: {
+          courses: {
+            select: {
+              name: true,
+              about: true,
+              level: true,
+              price: true,
+              published: true
+            }
+          },
+          users: {
+            select: {
+              fullName: true,
+              image: true
+            }
+          }
+        }
       });
       if (!purchased) throw new NotFoundException('Kurs sotib olinmagan');
       return {
@@ -76,6 +82,31 @@ export class PurchasedCoursesService {
       };
     } catch (error) {
       throw new BadRequestException(error.message)
+    }
+  }
+
+  async createPurchasedCourse(payload: CreatePurchasedCourseDto) {
+    const user = await this.prismaService.users.findUnique({
+      where: { phone: payload.phone },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found with this phone number');
+    }
+
+    const purchased = await this.prismaService.purchasedCourse.create({
+      data: {
+        courseId: payload.courseId,
+        userId: user.id,
+        paidVia: PaidVia.CASH,
+        amount: null,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Successfully Purchased",
+      data: purchased
     }
   }
 }
