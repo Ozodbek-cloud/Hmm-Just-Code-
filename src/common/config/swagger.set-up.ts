@@ -12,14 +12,15 @@ export function setupSwagger(app: INestApplication): void {
     .addTag('Profiles')
     .addTag('Courses')
     .addTag('Course Categories')
+    .addTag('Purchased Courses')
     .addTag('Category Ratings')
     .addTag('Lessons')
     .addTag('Lesson Groups')
     .addTag('Lesson Files')
     .addTag('Exam')
+    .addTag('Homeworks')
+    .addTag('Questions & Answers')
     .addTag('Users')
-    // .addTag('Lesson Files')
-    // .addTag('Lesson Files')
     .addBearerAuth()
     .build();
 

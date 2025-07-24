@@ -12,4 +12,4 @@ import { profilesController } from './profile.controller';
   controllers: [profilesController],
   providers: [ProfileService]
 })
-export class UsersModule {}
+export class ProfilesModule {}
