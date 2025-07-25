@@ -1,10 +1,10 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { CreateQuestionAnswerDto, CreateQuestionsDto } from './dto/create-questions-answer.dto';
-import { UpdateQuestionsAnswerDto } from './dto/update-questions-answer.dto';
+import { CreateQuestionAnswerDto, CreateQuestionsDto } from './interfaces/create-questions-answer.dto';
+import { UpdateQuestionsAnswerDto } from './interfaces/update-questions-answer.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import path from 'path';
 import { deleteMovieFile } from 'src/common/utils/delere-utils';
-import { GetQuestionsAnswerQueryDto } from './dto/query-dto';
+import { GetQuestionsAnswerQueryDto } from './interfaces/query-dto';
 
 @Injectable()
 export class QuestionsAnswersService {

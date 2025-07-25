@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { CreatePurchasedCourseDto } from './dto/create-purchased-course.dto';
-import { UpdatePurchasedCourseDto } from './dto/update-purchased-course.dto';
+import { CreatePurchasedCourseDto } from './interfaces/create-purchased-course.dto';
+import { UpdatePurchasedCourseDto } from './interfaces/update-purchased-course.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { PaidVia } from '@prisma/client';
-import {GetPurchasedQueryDto } from './dto/query-dto';
+import { GetCourseAndStudentQueryDto, GetPurchasedQueryDto } from './interfaces/query-dto';
 
 @Injectable()
 export class PurchasedCoursesService {
@@ -145,4 +145,53 @@ export class PurchasedCoursesService {
       data: purchased
     }
   }
+
+  async getCourse_To_Student(query: GetCourseAndStudentQueryDto) {
+    try {
+      const limit = query.limit ? query.limit : 10
+      const offset = query.offset ? query.offset : 0
+
+      const filters: any = {};
+
+      if (query.search) {
+        filters.OR = [
+          { name: { contains: query.search, mode: 'insensitive' } },
+          { about: { contains: query.search, mode: 'insensitive' } }
+        ];
+      }
+
+
+      if (query.id) {
+        filters.id = (query.id);
+      }
+
+      const total = await this.prismaService.course.count({
+        where: filters,
+      });
+
+      const totalPages = Math.ceil(total / limit);
+
+      const data = await this.prismaService.course.findMany({
+        where: filters,
+        skip: offset,
+        take: limit,
+      });
+
+      return {
+        success: true,
+        message: "Courses fetched successfully",
+        data,
+        pagination: {
+          total,
+          limit,
+          offset,
+          pages: totalPages,
+        },
+      };
+
+    } catch (error) {
+      throw new BadRequestException(error.message)
+    }
+  }
+
 }

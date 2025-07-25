@@ -2,9 +2,9 @@ import {  Controller,  Get,  Post,  Body,  Param,  Delete,  Put,  Query,  Upload
 import { FileInterceptor } from '@nestjs/platform-express';
 import { QuestionsAnswersService } from './questions-answers.service';
 import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiConsumes, ApiBody } from '@nestjs/swagger';
-import { CreateQuestionAnswerDto, CreateQuestionsDto } from './dto/create-questions-answer.dto';
-import { UpdateQuestionsAnswerDto } from './dto/update-questions-answer.dto';
-import { GetQuestionsAnswerQueryDto } from './dto/query-dto';
+import { CreateQuestionAnswerDto, CreateQuestionsDto } from './interfaces/create-questions-answer.dto';
+import { UpdateQuestionsAnswerDto } from './interfaces/update-questions-answer.dto';
+import { GetQuestionsAnswerQueryDto } from './interfaces/query-dto';
 
 @ApiTags('Questions & Answers')
 @Controller('questions-answers')

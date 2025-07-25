@@ -23,8 +23,30 @@ export class GetPurchasedQueryDto {
     @IsNumber()
     categoryId?: number;
 
-    @ApiPropertyOptional({example: CourseLevel.BEGINNER,description: 'Daraja (level)',enum: CourseLevel})
+    @ApiPropertyOptional({ example: CourseLevel.BEGINNER, description: 'Daraja (level)', enum: CourseLevel })
     @IsOptional()
     @IsEnum(CourseLevel)
     level?: CourseLevel;
+}
+
+export class GetCourseAndStudentQueryDto {
+    @ApiPropertyOptional({ example: 'asfeo2o3n', description: 'COurse Id' })
+    @IsOptional()
+    @IsString()
+    id?: String;
+
+    @ApiPropertyOptional({ example: 0, description: 'Offset qiymati' })
+    @IsOptional()
+    @IsNumber()
+    offset?: number;
+
+    @ApiPropertyOptional({ example: 10, description: 'Limit qiymati' })
+    @IsOptional()
+    @IsNumber()
+    limit?: number;
+
+    @ApiPropertyOptional({ example: 'nodejs', description: 'Qidirilayotgan matn' })
+    @IsOptional()
+    @IsString()
+    search?: string;
 }

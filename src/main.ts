@@ -3,8 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './common/config/swagger.set-up';
 import * as dotenv from "dotenv"
-import { join } from 'path';
-import * as express from 'express';
+
 
 dotenv.config()
 async function bootstrap() {
