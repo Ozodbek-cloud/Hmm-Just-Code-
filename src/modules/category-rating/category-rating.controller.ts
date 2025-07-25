@@ -40,7 +40,7 @@ export class CategoryRatingController {
   @Auth(UserRole.STUDENT)
   @ApiBearerAuth()
   @Post('add/rating')
-  @ApiOperation({ summary: 'Create a new rating' })
+  @ApiOperation({ summary: 'Create a new rating  | STUDENT' })
   @ApiBody({ type: CreateRatingDto })
   @ApiResponse({ status: 201, description: 'Successfully created rating' })
   create(@Req() req: Request, @Body() payload: CreateRatingDto) {
@@ -50,7 +50,7 @@ export class CategoryRatingController {
   @Auth(UserRole.ADMIN)
   @ApiBearerAuth()
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a rating by ID' })
+  @ApiOperation({ summary: 'Delete a rating by ID | ADMIN' })
   @ApiParam({ name: 'id', type: Number, description: 'ID of the rating to delete' })
   remove(@Param('id') id: number) {
     return this.ratingService.remove(+id);

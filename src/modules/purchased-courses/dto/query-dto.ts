@@ -2,7 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { CourseLevel } from '@prisma/client';
 import { IsOptional, IsString, IsNumber, IsEnum } from 'class-validator';
 
-export class GetCoursesQueryDto {
+export class GetPurchasedQueryDto {
     @ApiPropertyOptional({ example: 0, description: 'Offset qiymati' })
     @IsOptional()
     @IsNumber()

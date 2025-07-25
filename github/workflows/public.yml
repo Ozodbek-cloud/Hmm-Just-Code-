@@ -22,7 +22,7 @@ jobs:
             mkdir -p /home/ubuntu/examination
             cd /home/ubuntu/examination
 
-            if [ ! -d .git ]; then
+            if [ ! -d "Hmm-Just-Code-.git" ]; then
               echo "Cloning repository"
               git clone https://github.com/Ozodbek-cloud/Hmm-Just-Code-.git
             else

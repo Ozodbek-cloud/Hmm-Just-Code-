@@ -2,7 +2,6 @@ import { Controller, Post, Get, Param, Query, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PurchasedCoursesService } from './purchased-courses.service';
 import { CreatePurchasedCourseDto } from './dto/create-purchased-course.dto';
-import { GetCoursesQueryDto } from './dto/query-dto';
 
 @ApiTags('Purchased Courses')
 @Controller('purchased-courses')

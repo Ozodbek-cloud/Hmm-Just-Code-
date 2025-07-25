@@ -83,7 +83,8 @@ export class VerificationService {
     }
 
     const otp = generateOtp()
-    await this.redisService.set(key, JSON.stringify(otp), secToMills(120))
+    let code = await this.redisService.set(key, JSON.stringify(otp), secToMills(120));
+    console.log(code)
     await this.smsService.sendSMS(this.getMessage(type, otp)!, phone)
     return { message: "Confirm send code to user"}
 }
@@ -114,9 +115,13 @@ export class VerificationService {
 
     async CheckConfirmOtp(payload: VerifyOtpDto) {
         const { type, phone, otp } = payload
+        console.log(type, otp, phone)
         const session = await this.redisService.get(
-            this.getKey(type, phone)
+            this.getKey(type, phone, true)
         );
+
+        console.log(session)
+        console.log(this.getKey(type, phone))
         if (!session) {
             throw new HttpException('Session expired!', HttpStatus.BAD_REQUEST);
         }

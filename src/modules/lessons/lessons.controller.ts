@@ -40,7 +40,7 @@ export class LessonsController {
       },
     }),
   )
-  @ApiOperation({ summary: 'Create a new lesson with video upload' })
+  @ApiOperation({ summary: 'Create a new lesson with video upload | ADMIN | MENTOR' })
   @ApiResponse({ status: 201, description: 'Lesson successfully created' })
   create(
     @Body() createLessonDto: CreateLessonDto,
@@ -52,7 +52,7 @@ export class LessonsController {
   @Get('all')
   @Auth(UserRole.ADMIN, UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all lessons' })
+  @ApiOperation({ summary: 'Get all lessons | ADMIN | MENTOR ' })
   @ApiResponse({ status: 200, description: 'List of all lessons' })
   findAll() {
     return this.lessonsService.findAll();
@@ -61,7 +61,7 @@ export class LessonsController {
   @Get(':id/detail')
   @Auth(UserRole.ADMIN, UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get Detail OF lessons' })
+  @ApiOperation({ summary: 'Get Detail OF lessons | ADMIN | MENTOR' })
   @ApiResponse({ status: 200, description: 'Detail of all lessons' })
   finddetail() {
     return this.lessonsService.findAll();
@@ -70,7 +70,7 @@ export class LessonsController {
   @Get(':id/lesson')
   @Auth(UserRole.STUDENT)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get one lesson by ID' })
+  @ApiOperation({ summary: 'Get one lesson by ID | STUDENT' })
   @ApiParam({ name: 'id', required: true, description: 'Lesson ID' })
   @ApiResponse({ status: 200, description: 'Single lesson data' })
   @ApiResponse({ status: 404, description: 'Lesson not found' })
@@ -102,7 +102,7 @@ export class LessonsController {
   )
   @Auth(UserRole.ADMIN, UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update a lesson and optionally replace the video' })
+  @ApiOperation({ summary: 'Update a lesson and optionally replace the video | ADMIN | MENTOR' })
   @ApiParam({ name: 'id', required: true, description: 'Lesson ID to update' })
   @ApiConsumes('multipart/from-data')
   @ApiResponse({ status: 200, description: 'Lesson successfully updated' })
@@ -118,7 +118,7 @@ export class LessonsController {
   @Auth(UserRole.STUDENT)
   @ApiBearerAuth()
   @Put(':id/view')
-  @ApiOperation({ summary: 'Turn lesson view on or off' })
+  @ApiOperation({ summary: 'Turn lesson view on or off | STUDENT' })
   @ApiParam({ name: 'id', required: true, description: 'Lesson ID' })
   @ApiQuery({ name: 'view', required: true, type: Boolean, example: true })
   @ApiResponse({ status: 200, description: 'Successfully updated lesson view' })
@@ -133,7 +133,7 @@ export class LessonsController {
   @Delete(':id/lesson-delete')
   @Auth(UserRole.ADMIN, UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete a lesson by ID' })
+  @ApiOperation({ summary: 'Delete a lesson by ID | ADMIN | MENTOR' })
   @ApiParam({ name: 'id', required: true, description: 'Lesson ID to delete' })
   @ApiResponse({ status: 200, description: 'Lesson successfully deleted' })
   @ApiResponse({ status: 404, description: 'Lesson not found' })

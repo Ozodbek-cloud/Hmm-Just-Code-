@@ -23,7 +23,7 @@ export class ExamController {
   @Get('lesson-group/:lessonGroupId')
   @Auth(UserRole.STUDENT)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get exams by lesson group ID' })
+  @ApiOperation({ summary: 'Get exams by lesson group ID | STUDENT' })
   @ApiParam({ name: 'lessonGroupId', type: Number })
   @ApiResponse({ status: 200, description: 'Exam found by lesson group' })
   findOne(@Param('lessonGroupId') lessonGroupId: number) {
@@ -33,7 +33,7 @@ export class ExamController {
   @Get('detail-by-lesson-group/:lessonGroupId')
   @Auth(UserRole.ADMIN, UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get exam details by lesson group ID' })
+  @ApiOperation({ summary: 'Get exam details by lesson group ID | ADMIN | MENTOR' })
   @ApiParam({ name: 'lessonGroupId', type: Number })
   @ApiResponse({ status: 200, description: 'Exam with lesson group details' })
   findByDetails(@Param('lessonGroupId') lessonGroupId: number) {
@@ -43,7 +43,7 @@ export class ExamController {
   @Get('detail/:id')
   @Auth(UserRole.ADMIN, UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get exam detail by exam ID' })
+  @ApiOperation({ summary: 'Get exam detail by exam ID | ADMIN | MENTOR ' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Exam detail by ID' })
   getDetailOfExam(@Param('id') id: number) {
@@ -53,7 +53,7 @@ export class ExamController {
   @Post('create/one')
   @Auth(UserRole.ADMIN, UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create one exam' })
+  @ApiOperation({ summary: 'Create one exam | ADMIN | MENTOR' })
   @ApiResponse({ status: 201, description: 'Exam successfully created' })
   create(@Body() createExamDto: CreateExamDto) {
     return this.examService.create(createExamDto);
@@ -62,7 +62,7 @@ export class ExamController {
   @Post('create/many')
   @Auth(UserRole.ADMIN, UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create many exams' })
+  @ApiOperation({ summary: 'Create many exams  | ADMIN | MENTOR' })
   @ApiResponse({ status: 201, description: 'Exams successfully created' })
   createMany(@Body() createManyExamsDto: CreateManyExamsDto) {
     return this.examService.createMany(createManyExamsDto);
@@ -71,7 +71,7 @@ export class ExamController {
   @Post('pass/:userId')
   @Auth(UserRole.STUDENT)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Pass an exam by user' })
+  @ApiOperation({ summary: 'Pass an exam by user | STUDENT' })
   @ApiParam({ name: 'userId', type: Number })
   @ApiResponse({ status: 200, description: 'Exam result' })
   PassExam(@Param('userId') userId: number, @Body() dto: PassExamDto) {
@@ -80,7 +80,7 @@ export class ExamController {
   @Patch(':id')
   @Auth(UserRole.ADMIN, UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update an exam by ID' })
+  @ApiOperation({ summary: 'Update an exam by ID | ADMIN | MENTOR' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Exam successfully updated' })
   update(@Param('id') id: number, @Body() updateExamDto: UpdateExamDto) {
@@ -90,7 +90,7 @@ export class ExamController {
   @Delete(':id')
   @Auth(UserRole.ADMIN, UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete an exam by ID' })
+  @ApiOperation({ summary: 'Delete an exam by ID | ADMIN | MENTOR' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Exam successfully deleted' })
   remove(@Param('id') id: number) {
@@ -100,7 +100,7 @@ export class ExamController {
   @Get('results')
   @Auth(UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get exam results with filters and pagination' })
+  @ApiOperation({ summary: 'Get exam results with filters and pagination | ADMIN ' })
   @ApiQuery({ name: 'date_from', required: false, type: String, example: '2024-01-01' })
   @ApiQuery({ name: 'date_to', required: false, type: String, example: '2024-12-31' })
   @ApiQuery({ name: 'offset', required: false, type: String, example: '0' })
@@ -119,7 +119,7 @@ export class ExamController {
   @Get('results/mentor')
   @Auth(UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get exam results with filters and pagination for Mentor' })
+  @ApiOperation({ summary: 'Get exam results with filters and pagination for Mentor | MENTOR' })
   @ApiQuery({ name: 'date_from', required: false, type: String, example: '2024-01-01' })
   @ApiQuery({ name: 'date_to', required: false, type: String, example: '2024-12-31' })
   @ApiQuery({ name: 'id', required: true, type: String })

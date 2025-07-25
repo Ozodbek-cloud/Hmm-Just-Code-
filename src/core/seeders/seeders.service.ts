@@ -19,12 +19,12 @@ export class SeedersService implements OnModuleInit {
 
     const fullName = "Ozodbek Nasriddinov"
     const password = "cRcD+2WQNGu("
-    const phone = "+998945683699"
+    const phone = "+998941111111"
 
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await this.prismaService.users.create({data: {fullName: fullName, password: hashedPassword, phone: phone, role: 'ADMIN'}})
+    await this.prismaService.users.create({data: {fullName: fullName, password: hashedPassword, phone: phone, role: 'STUDENT'}})
 
     this.logger.log('✅ Admin successfully created!');
   }

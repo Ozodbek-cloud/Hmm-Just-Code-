@@ -1,15 +1,15 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UnsupportedMediaTypeException, UploadedFiles, Query } from '@nestjs/common';
 import { CourseService } from './course.service';
-import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto, UpdateMentorDto } from './dto/update-course.dto';
+import { CreateCourseDto } from './interfaces/create-course.dto';
+import { UpdateCourseDto, UpdateMentorDto } from './interfaces/update-course.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from "uuid"
 import { extname } from 'path';
 import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { GetCoursesDto, GetOtherCoursesDto, GetOtherMentorDto } from './dto/Search-course.dto';
+import { GetCoursesDto, GetOtherCoursesDto, GetOtherMentorDto } from './interfaces/Search-course.dto';
 import { CourseLevel } from '@prisma/client';
-import { CreateAssignedCourseDto } from './dto/Add-Assign.dto';
+import { CreateAssignedCourseDto } from './interfaces/Add-Assign.dto';
 
 @ApiTags('Courses')
 @Controller('course')

@@ -40,32 +40,41 @@ export class AuthService {
         await this.verifiacationService.CheckConfirmOtp({
             type: EverificationTypes.REGISTER,
             phone: payload.phone,
-            otp: payload.otp_code
-        })
+            otp: payload.otp
+        });
 
-        let fullname = await this.prismaService.users.findFirst({ where: { fullName: payload.fullName } })
-        if (fullname) throw new ConflictException(`${payload.fullName} is already registered!`)
-        let phone = await this.prismaService.users.findFirst({ where: { phone: payload.phone } })
-        if (phone) throw new ConflictException(`${payload.phone} is already exists!`)
+        const fullname = await this.prismaService.users.findFirst({ where: { fullName: payload.fullName } });
+        if (fullname) throw new ConflictException(`${payload.fullName} is already registered!`);
 
-        let stored = await this.redisService.get(payload.phone)
-        if (!stored) throw new BadRequestException("Otp expire or not Found")
+        const phone = await this.prismaService.users.findFirst({ where: { phone: payload.phone } });
+        if (phone) throw new ConflictException(`${payload.phone} is already exists!`);
 
-        let UserData = JSON.parse(stored)
-        if (UserData.otp_code !== payload.otp_code) {
-            throw new BadRequestException("Otp invalide")
+        const stored = await this.redisService.get(
+            this.verifiacationService.getKey(EverificationTypes.REGISTER, payload.phone, true)
+        );
+
+        console.log(stored)
+        if (!stored) throw new BadRequestException("Otp expire or not Found");
+
+        const UserData = JSON.parse(stored);
+        if (UserData !== payload.otp) {
+            throw new BadRequestException("Otp invalide");
         }
 
-        await this.redisService.del(payload.phone)
-        let hash = await bcrypt.hash(payload.password, 10)
-        let created = await this.prismaService.users.create({ data: { ...payload, password: hash } })
+        await this.redisService.del(
+            this.verifiacationService.getKey(EverificationTypes.REGISTER, payload.phone, true)
+        );
+
+        const hash = await bcrypt.hash(payload.password, 10);
+        const created = await this.prismaService.users.create({ data: { ...payload, password: hash } });
 
         return {
             success: true,
             message: 'Successfully Registered, Next Step Login!',
             data: created
-        }
+        };
     }
+
 
 
     async login(payload: Required<LoginDto>) {

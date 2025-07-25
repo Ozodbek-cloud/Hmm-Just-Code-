@@ -1,7 +1,9 @@
 import { Body, Controller, Get, Param, Patch, Req, UnsupportedMediaTypeException, UseInterceptors } from '@nestjs/common';
 import { MentorProfilesService } from './mentor-profiles.service';
 import { Update_Mentor_ProfileDto } from './interfaces/update-mentor';
-import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiResponse, ApiConsumes } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiResponse, ApiConsumes, ApiBearerAuth } from '@nestjs/swagger';
+import { Auth } from 'src/core/decorators/decorators.service';
+import { UserRole } from '@prisma/client';
 
 
 @ApiTags('Mentor Profiles')
@@ -10,7 +12,9 @@ export class MentorProfilesController {
     constructor(private readonly mentorService: MentorProfilesService) { }
 
     @Get(':id/mentor-id')
-    @ApiOperation({ summary: 'Get One Mentor Profile' })
+    @Auth(UserRole.ADMIN, UserRole.MENTOR)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get One Mentor Profile | ADMIN | MENTOR' })
     @ApiParam({ name: 'id', type: Number, description: 'Mentor profile Id', example: 1 })
     @ApiResponse({ status: 200, description: 'Mentor profile getted successfully' })
     @ApiResponse({ status: 400, description: 'Bad request or validation error' })
@@ -20,7 +24,9 @@ export class MentorProfilesController {
     }
 
     @Get(':job/mentor-job')
-    @ApiOperation({ summary: 'Get By Job Mentor Profile' })
+    @Auth(UserRole.ADMIN, UserRole.MENTOR)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get By Job Mentor Profile | ADMIN | MENTOR' })
     @ApiParam({ name: 'job', type: String, description: 'Mentor profile Job', example: 'Policer' })
     @ApiResponse({ status: 200, description: 'Mentor profile Getted successfully' })
     @ApiResponse({ status: 400, description: 'Bad request or validation error' })
@@ -30,7 +36,9 @@ export class MentorProfilesController {
     }
 
     @Get(':year/mentor-year')
-    @ApiOperation({ summary: 'Get By Experience Year Mentor Profile' })
+    @Auth(UserRole.ADMIN, UserRole.MENTOR)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get By Experience Year Mentor Profile | ADMIN | MENTOR' })
     @ApiParam({ name: 'year', type: Number, description: 'Mentor profile Experience Year', example: 5 })
     @ApiResponse({ status: 200, description: 'Mentor profile Getted successfully' })
     @ApiResponse({ status: 400, description: 'Bad request or validation error' })

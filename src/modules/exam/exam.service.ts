@@ -46,6 +46,7 @@ export class ExamService {
 
       return { success: true, count: result.count, message: `${result.count} Created` };
     } catch (error) {
+      console.log(error.message)
       throw new BadRequestException(error.message);
     }
   }

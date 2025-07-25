@@ -32,7 +32,7 @@ export class CourseCategoryController {
   @Auth(UserRole.ADMIN)
   @ApiBearerAuth()
   @Post('create')
-  @ApiOperation({ summary: 'Create a new course category' })
+  @ApiOperation({ summary: 'Create a new course category | ADMIN' })
   @ApiResponse({ status: 201, description: 'Course category successfully created.' })
   async create(@Body() payload: CourseCategoryDto) {
     return await this.categoryService.create_category(payload);
@@ -41,7 +41,7 @@ export class CourseCategoryController {
   @Auth(UserRole.ADMIN)
   @ApiBearerAuth()
   @Put(':id')
-  @ApiOperation({ summary: 'Update a course category by ID' })
+  @ApiOperation({ summary: 'Update a course category by ID | ADMIN' })
   @ApiResponse({ status: 200, description: 'Course category updated successfully.' })
   @ApiResponse({ status: 404, description: 'Course category not found.' })
   async update(
@@ -54,7 +54,7 @@ export class CourseCategoryController {
   @Auth(UserRole.ADMIN)
   @ApiBearerAuth()
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a course category by ID' })
+  @ApiOperation({ summary: 'Delete a course category by ID | ADMIN' })
   @ApiResponse({ status: 200, description: 'Course category deleted successfully.' })
   @ApiResponse({ status: 404, description: 'Course category not found.' })
   async delete(@Param('id') id: number) {

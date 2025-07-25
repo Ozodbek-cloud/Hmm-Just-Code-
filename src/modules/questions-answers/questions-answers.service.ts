@@ -269,13 +269,15 @@ export class QuestionsAnswersService {
   async update(id: number, payload: UpdateQuestionsAnswerDto, file: Express.Multer.File) {
     try {
       let file_filename = file.filename
+      let updateat = new Date()
       let data = await this.prismaService.questionAnswer.update({
         where: {
           id: id
         },
         data: {
           ...payload,
-          ...(file && { file: file_filename })
+          ...(file && { file: file_filename }),
+          updatedAt: updateat
         }
       })
       if (!data) throw new NotFoundException(`This ${id} is not found`)

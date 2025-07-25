@@ -3,7 +3,7 @@ import { CreatePurchasedCourseDto } from './dto/create-purchased-course.dto';
 import { UpdatePurchasedCourseDto } from './dto/update-purchased-course.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { PaidVia } from '@prisma/client';
-import { GetCoursesQueryDto } from './dto/query-dto';
+import {GetPurchasedQueryDto } from './dto/query-dto';
 
 @Injectable()
 export class PurchasedCoursesService {
@@ -32,20 +32,56 @@ export class PurchasedCoursesService {
     }
   }
 
-  // async getAll(userId: number, query: GetCoursesQueryDto) {
-  //   try {
+  async getAll(userId: number, query: GetPurchasedQueryDto) {
+    try {
+      const limit = query.limit ? query.limit : 10
+      const offset = query.offset ? query.offset : 0
 
+      const filters: any = {};
 
+      if (query.search) {
+        filters.OR = [
+          { name: { contains: query.search, mode: 'insensitive' } },
+          { about: { contains: query.search, mode: 'insensitive' } }
+        ];
+      }
 
-  //     return {
-  //       success: true,
-  //       message: "Successfully Getted All Purchased Courses",
-  //       data: all,
-  //     }
-  //   } catch (error) {
-  //     throw new BadRequestException(error.message)
-  //   }
-  // }
+      if (query.level) {
+        filters.level = query.level;
+      }
+
+      if (query.categoryId) {
+        filters.categoryId = (query.categoryId);
+      }
+
+      const total = await this.prismaService.course.count({
+        where: filters,
+      });
+
+      const totalPages = Math.ceil(total / limit);
+
+      const data = await this.prismaService.course.findMany({
+        where: filters,
+        skip: offset,
+        take: limit,
+      });
+
+      return {
+        success: true,
+        message: "Courses fetched successfully",
+        data,
+        pagination: {
+          total,
+          limit,
+          offset,
+          pages: totalPages,
+        },
+      };
+
+    } catch (error) {
+      throw new BadRequestException(error.message)
+    }
+  }
 
   async getOne(courseId: string, userId: number) {
     try {

@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
+import { CreateCourseDto } from './interfaces/create-course.dto';
+import { UpdateCourseDto } from './interfaces/update-course.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
-import { GetCoursesDto, GetOtherCoursesDto, GetOtherMentorDto } from './dto/Search-course.dto';
-import { CreateAssignedCourseDto } from './dto/Add-Assign.dto';
+import { GetCoursesDto, GetOtherCoursesDto, GetOtherMentorDto } from './interfaces/Search-course.dto';
+import { CreateAssignedCourseDto } from './interfaces/Add-Assign.dto';
 import { deleteMovieFile } from 'src/common/utils/delere-utils';
 import path from 'path';
 
@@ -19,7 +19,7 @@ export class CourseService {
         data: {
           ...payload,
           banner: banner_filename,
-          introVideo: introVideo_filename
+          ...(introVideo && ({introVideo: introVideo_filename}))
         }
       })
       return {
@@ -672,13 +672,14 @@ export class CourseService {
 
       const banner_filename = banner?.filename || course.banner;
       const introVideo_filename = introVideo?.filename || course.introVideo;
-
+      let updateat = new Date();
       const updated = await this.prismaService.course.update({
         where: { id },
         data: {
           ...payload,
           banner: banner_filename,
-          introVideo: introVideo_filename,
+          updatedAt: updateat.toString(),
+          ...(introVideo && ({introVideo: introVideo_filename})),
         },
       });
 

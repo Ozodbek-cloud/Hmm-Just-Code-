@@ -17,7 +17,7 @@ export class RegisterDto {
   })
   @IsString()
   @IsNotEmpty()
-  otp_code: string
+  otp: string
 
   @ApiProperty({
     example: 'NoName',

@@ -1,4 +1,4 @@
-import {  Controller,  Get,  Post,  Body,  Param,  Delete,  Put,  Query,  UploadedFile,  UseInterceptors,  ParseIntPipe, Patch,} from '@nestjs/common';
+import {  Controller,  Get,  Post,  Body,  Param,  Delete,  Put,  Query,  UploadedFile,  UseInterceptors,  ParseIntPipe, Patch, Req,} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { QuestionsAnswersService } from './questions-answers.service';
 import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiConsumes, ApiBody } from '@nestjs/swagger';
@@ -36,17 +36,14 @@ export class QuestionsAnswersController {
     return this.service.read(id);
   }
 
-  @Post(':userId/:courseId')
+  @Post(':courseId')
   @ApiOperation({ summary: 'Create question with file upload' })
   @ApiConsumes('multipart/form-data')
-  @ApiParam({ name: 'userId', type: Number })
   @ApiParam({ name: 'courseId', type: String })
-  @ApiBody({
-    type: CreateQuestionsDto,
-  })
+  @ApiBody({type: CreateQuestionsDto})
   @UseInterceptors(FileInterceptor('file'))
-  createQuestion(@Param('userId', ParseIntPipe) userId: number,@Param('courseId') courseId: string,@Body() body: CreateQuestionsDto,@UploadedFile() file: Express.Multer.File){
-    return this.service.create_question(userId, courseId, body, file);
+  createQuestion(@Req() req: Request,@Param('courseId') courseId: string,@Body() body: CreateQuestionsDto,@UploadedFile() file: Express.Multer.File){
+    return this.service.create_question(req['user'].id, courseId, body, file);
   }
 
   @Patch(':id/question')
@@ -57,13 +54,12 @@ export class QuestionsAnswersController {
     return this.service.update_question(id, body, file);
   }
 
-  @Post('answer/:userId/:questionId')
+  @Post('answer/:questionId')
   @ApiOperation({ summary: 'Create question answer' })
   @ApiConsumes('multipart/form-data')
-  @ApiParam({ name: 'userId', type: Number })
   @ApiParam({ name: 'questionId', type: Number })
-  @UseInterceptors(FileInterceptor('file'))createAnswer(  @Param('userId', ParseIntPipe) userId: number,  @Param('questionId', ParseIntPipe) questionId: number,  @Body() body: CreateQuestionAnswerDto,  @UploadedFile() file: Express.Multer.File,) {
-    return this.service.create_question_answer(userId, questionId, body, file);
+  @UseInterceptors(FileInterceptor('file')) createAnswer(@Req() req: Request,  @Param('questionId', ParseIntPipe) questionId: number,  @Body() body: CreateQuestionAnswerDto,  @UploadedFile() file: Express.Multer.File,) {
+    return this.service.create_question_answer(req['user'].id, questionId, body, file);
   }
 
   @Patch('answer/:id')

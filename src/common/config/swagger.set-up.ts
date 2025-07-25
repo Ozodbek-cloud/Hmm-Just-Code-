@@ -3,8 +3,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
-    .setTitle('Learning Management Platform')
-    .setDescription('The Learning API description')
+    .setTitle('EduNite Platform')
+    .setDescription('Education Unite')
     .setVersion('1.0')
     .addTag('Auth')
     .addTag('Verification')

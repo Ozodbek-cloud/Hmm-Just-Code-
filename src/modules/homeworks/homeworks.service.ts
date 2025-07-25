@@ -13,11 +13,11 @@ export class HomeworksService {
 
   async create(createHomeworkDto: CreateHomeworkDto, file: Express.Multer.File) {
     try {
-      let filname = file?.filename
+      let filname = file.filename
       let created = await this.prismaService.homework.create({
         data: {
           ...createHomeworkDto,
-          ...(file && { file: file.filename }),
+          ...(file && { file: filname }),
         },
       })
       return {
@@ -132,12 +132,14 @@ export class HomeworksService {
       if (file && file.originalname) {
         filename = file.filename;
       }
+      let updateat = new Date()
       let updated = await this.prismaService.homework.update({
         where: {
           id: id
         },
         data: {
-          ...updateHomeworkDto, file: filename
+          ...updateHomeworkDto, file: filename,
+          updatedAt: updateat
         },
       })
       if (file && updated.file && updated.file !== file.filename) {
