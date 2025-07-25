@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { CreateAsisstandDto, CreateMentor, CreateUserDto } from './dto/create-user.dto';
-import { UpdateMentorDto } from './dto/update-user.dto';
+import { UpdateMentorsDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { UserRole } from '@prisma/client';
 
@@ -322,7 +322,7 @@ export class UsersService {
   }
 
 
-  async update_mentor(userId: number, payload: UpdateMentorDto) {
+  async update_mentor(userId: number, payload: UpdateMentorsDto) {
     try {
       return await this.prismaService.$transaction(async (tx) => {
         const user = await tx.users.findUnique({ where: { id: userId } });

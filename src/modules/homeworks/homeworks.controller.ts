@@ -16,6 +16,9 @@ export class HomeworksController {
   constructor(private readonly homeworksService: HomeworksService) { }
 
   @Post('add')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Create Homework | ADMIN | MENTOR" })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -49,16 +52,25 @@ export class HomeworksController {
   }
 
   @Get('all')
+  @Auth(UserRole.ADMIN, UserRole.ASSISTANT, UserRole.MENTOR)
+  @ApiOperation({ summary: "Get ALL Homework WIth COurse Id| ADMIN | MENTOR | ASSISTANT" })
+  @ApiBearerAuth()
   findAll(@Query() query: GetHomeworksQueryDto) {
     return this.homeworksService.getLessonGroupsWithHomeworks(query);
   }
 
   @Get(':id/detail')
+  @Auth(UserRole.ADMIN, UserRole.ASSISTANT, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get All Detail Id| ADMIN | MENTOR | ASSISTANT" })
   findOne(@Param('id') id: string) {
     return this.homeworksService.findOne(+id);
   }
 
   @Patch(':id/update/homework')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Update Homework | ADMIN | MENTOR" })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -92,22 +104,27 @@ export class HomeworksController {
   }
 
   @Delete(':id/delete')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Delete Homework | ADMIN | MENTOR" })
   remove(@Param('id') id: string) {
     return this.homeworksService.remove(+id);
   }
 
   @Get('submission/mine/:lessonId')
-  @ApiOperation({ summary: 'Get my homework submission by lessonId (Student)' })
+  @Auth(UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get my homework submission by lessonId | STUDENT' })
   @ApiParam({ name: 'lessonId', type: String })
   @ApiResponse({ status: 200, description: 'Successfully fetched submission' })
-  getMySubmission(@Query() query : GetSubmitsQueryDto) {
+  getMySubmission(@Query() query: GetSubmitsQueryDto) {
     return this.homeworksService.get_submissions(query);
   }
 
-  @Auth(UserRole.ADMIN)
+  @Auth(UserRole.STUDENT)
   @ApiBearerAuth()
   @Post('submission/submit/:lessonId')
-  @ApiOperation({ summary: 'Submit homework for a lesson (Student)' })
+  @ApiOperation({ summary: 'Submit homework for a lesson | STUDENT' })
   @ApiParam({ name: 'lessonId', type: String })
   @ApiResponse({ status: 201, description: 'Homework submitted successfully' })
   submitHomework(@Param('lessonId') lessonId: string, @Body() payload: SubmissionDto, @Req() req: Request) {
@@ -115,7 +132,9 @@ export class HomeworksController {
   }
 
   @Get('submissions/all')
-  @ApiOperation({ summary: 'Get all submissions (Mentor, Admin, Assistant)' })
+  @Auth(UserRole.ADMIN, UserRole.MENTOR, UserRole.ASSISTANT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all submissions | Mentor, |  Admin, | Assistant' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'lessonId', required: false })
@@ -125,7 +144,9 @@ export class HomeworksController {
   }
 
   @Get('submissions/single/:id')
-  @ApiOperation({ summary: 'Get single submission by ID (Mentor, Admin, Assistant)' })
+  @Auth(UserRole.ADMIN, UserRole.MENTOR, UserRole.ASSISTANT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get single submission by ID | Mentor Admin| Assistant' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Single submission returned successfully' })
   getSingleSubmission(@Param('id') id: string) {
@@ -133,7 +154,9 @@ export class HomeworksController {
   }
 
   @Post('submission/check')
-  @ApiOperation({ summary: 'Check/Approve/Reject a submission (Mentor, Admin, Assistant)' })
+  @Auth(UserRole.ADMIN, UserRole.MENTOR, UserRole.ASSISTANT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check/Approve/Reject a submission | Mentor | Admin | Assistant' })
   @ApiQuery({ name: 'submissionId', type: Number })
   @ApiResponse({ status: 200, description: 'Submission checked successfully' })
   checkSubmission(@Query('submissionId') submissionId: string, @Body() payload: CheckDto) {

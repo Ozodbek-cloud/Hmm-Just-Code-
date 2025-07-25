@@ -21,6 +21,8 @@ export function setupSwagger(app: INestApplication): void {
     .addTag('Homeworks')
     .addTag('Questions & Answers')
     .addTag('Users')
+    .addTag('Payment')
+    .addTag('Contact')
     .addBearerAuth()
     .build();
 

@@ -6,10 +6,11 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from "uuid"
 import { extname } from 'path';
-import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { GetCoursesDto, GetOtherCoursesDto, GetOtherMentorDto } from './interfaces/Search-course.dto';
-import { CourseLevel } from '@prisma/client';
+import { CourseLevel, UserRole } from '@prisma/client';
 import { CreateAssignedCourseDto } from './interfaces/Add-Assign.dto';
+import { Auth } from 'src/core/decorators/decorators.service';
 
 @ApiTags('Courses')
 @Controller('course')
@@ -21,30 +22,6 @@ export class CourseController {
     return this.courseService.findAll(query);
   }
 
-  @Get('admin')
-  @ApiOperation({ summary: 'Get all courses (for admin)' })
-  findAllAdmin(@Query() query: GetOtherCoursesDto) {
-    return this.courseService.findAllAdmin(query);
-  }
-
-  @Get('mentor')
-  @ApiOperation({ summary: 'Get mentor courses (admin)' })
-  findAllMentorAdmin(@Query() query: GetOtherCoursesDto) {
-    return this.courseService.findAllMentorAdmin(query);
-  }
-
-  @Get('assistant')
-  @ApiOperation({ summary: 'Get assistant courses (admin)' })
-  findAllAssistantAdmin(@Query() query: GetOtherCoursesDto) {
-    return this.courseService.findAllAsisstand(query);
-  }
-
-  @Get('mentor/courses')
-  @ApiOperation({ summary: 'Get mentor\'s own courses' })
-  getMentorCourses(@Query() query: GetOtherMentorDto) {
-    return this.courseService.findAllMentor(query);
-  }
-
   @Get(':id/single')
   @ApiOperation({ summary: 'Get one course with full details' })
   findOne(@Param('id') id: string) {
@@ -52,13 +29,47 @@ export class CourseController {
   }
 
   @Get(':id/single-full')
-  @ApiOperation({ summary: 'Get one course' })
+  @Auth(UserRole.ADMIN, UserRole.ASSISTANT, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get one course | ADMIN | MENTOR | ASSISTANT' })
   findBasic(@Param('id') id: string) {
     return this.courseService.find_single(id);
   }
 
+  @Get('all')
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all courses | ADMIN' })
+  findAllAdmin(@Query() query: GetOtherCoursesDto) {
+    return this.courseService.findAllAdmin(query);
+  }
+
+  @Get('my')
+  @ApiOperation({ summary: 'Get mentor courses | ADMIN | MENTOR' })
+  findAllMentorAdmin(@Query() query: GetOtherCoursesDto) {
+    return this.courseService.findAllMentorAdmin(query);
+  }
+
+  @Get('my/assgined')
+  @Auth(UserRole.ASSISTANT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get assistant courses | ASSISTANT' })
+  findAllAssistantAdmin(@Query() query: GetOtherCoursesDto) {
+    return this.courseService.findAllAsisstand(query);
+  }
+
+  @Get('mentor')
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get mentor\'s own courses | ADMIN' })
+  getMentorCourses(@Query() query: GetOtherMentorDto) {
+    return this.courseService.findAllMentor(query);
+  }
+
   @Get(':id/assistants')
-  @ApiOperation({ summary: 'Get assistants of a course with pagination' })
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get assistants of a course with pagination | ADMIN| MENTOR' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   getAssistants(
@@ -70,6 +81,9 @@ export class CourseController {
   }
 
   @Post('create')
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a course | ADMIN | MENTOR' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -125,13 +139,17 @@ export class CourseController {
   }
 
   @Post('assign')
-  @ApiOperation({ summary: 'Assign assistant to course' })
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Assign assistant to course | ADMIN | MENTOR' })
   assignCourse(@Body() payload: CreateAssignedCourseDto) {
     return this.courseService.add_assign(payload);
   }
 
   @Post('unassign')
-  @ApiOperation({ summary: 'Unassign assistant from course' })
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Unassign assistant from course | ADMIN | MENTOR' })
   @ApiQuery({ name: 'assistandId', required: true, type: Number })
   @ApiQuery({ name: 'courseId', required: true, type: String })
   unassign(
@@ -142,7 +160,9 @@ export class CourseController {
   }
 
   @Patch(':id/update/course')
-  @ApiOperation({ summary: 'Update a course' })
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a course | ADMIN | MENTOR' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -198,26 +218,34 @@ export class CourseController {
   }
 
   @Post(':id/publish')
-  @ApiOperation({ summary: 'Publish a course' })
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Publish a course | ADMIN' })
   publish(@Param('id') id: string) {
     return this.courseService.published(id);
   }
 
   @Post(':id/unpublish')
-  @ApiOperation({ summary: 'Unpublish a course' })
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Unpublish a course | ADMIN' })
   unpublish(@Param('id') id: string) {
     return this.courseService.unpublished(id);
   }
 
   @Patch('update-mentor')
-  @ApiOperation({ summary: 'Update the mentor of a course' })
+  @Auth(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update the mentor of a course| ADMIN' })
   @ApiBody({ type: UpdateMentorDto })
   updateMentor(@Body() dto: UpdateMentorDto) {
     return this.courseService.update_mentor(dto.courseId, dto.userId);
   }
 
   @Delete(':id/delete/course')
-  @ApiOperation({ summary: 'Delete a course' })
+  @Auth(UserRole.ADMIN, UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a course ADMIN | MENTOR' })
   remove(@Param('id') id: string) {
     return this.courseService.remove(id);
   }

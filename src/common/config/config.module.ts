@@ -20,10 +20,12 @@ import { HomeworksModule } from 'src/modules/homeworks/homeworks.module';
 import { QuestionsAnswersModule } from 'src/modules/questions-answers/questions-answers.module';
 import { PurchasedCoursesModule } from 'src/modules/purchased-courses/purchased-courses.module';
 import { UsersModule } from 'src/modules/users/users.module';
+import { PaymentModule } from 'src/modules/payment/payment.module';
+import { ContactModule } from 'src/modules/contact/contact.module';
 
 @Module({
     imports: [JwtModule, MailModule, RedisModule, PrismaModule, AuthModule, MentorProfilesModule, VerificationModule, ProfilesModule, UsersModule, CourseCategoryModule
-        , LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, CourseModule, HomeworksModule, QuestionsAnswersModule, PurchasedCoursesModule
+        , LastActivityModule, CategoryRatingModule, LessonsModule, LessonGroupsModule, LessonFileModule, ExamModule, CourseModule, HomeworksModule, QuestionsAnswersModule, PurchasedCoursesModule, PaymentModule, ContactModule
     ]
 })
 
