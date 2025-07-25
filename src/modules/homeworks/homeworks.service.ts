@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { CreateHomeworkDto } from './dto/create-homework.dto';
-import { UpdateHomeworkDto } from './dto/update-homework.dto';
+import { CreateHomeworkDto } from './interfaces/create-homework.dto';
+import { UpdateHomeworkDto } from './interfaces/update-homework.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import path from 'path';
 import { deleteMovieFile } from 'src/common/utils/delere-utils';
-import { GetHomeworksQueryDto, GetSubmitQueryDto, GetSubmitsQueryDto } from './dto/query.dto';
-import { CheckDto, SubmissionDto } from './dto/submission.dto';
+import { GetHomeworksQueryDto, GetSubmitQueryDto, GetSubmitsQueryDto } from './interfaces/query.dto';
+import { CheckDto, SubmissionDto } from './interfaces/submission.dto';
 
 @Injectable()
 export class HomeworksService {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, Query, UploadedFile, UseInterceptors, ParseIntPipe, Patch, Req, } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Query, UploadedFile, UseInterceptors, ParseIntPipe, Patch, Req, UnsupportedMediaTypeException, } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { QuestionsAnswersService } from './questions-answers.service';
 import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
@@ -7,7 +7,9 @@ import { UpdateQuestionsAnswerDto } from './interfaces/update-questions-answer.d
 import { GetQuestionsAnswerQueryDto } from './interfaces/query-dto';
 import { Auth } from 'src/core/decorators/decorators.service';
 import { UserRole } from '@prisma/client';
-
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { v4 as uuidv4 } from "uuid"
 @ApiTags('Questions & Answers')
 @Controller('questions-answers')
 export class QuestionsAnswersController {
@@ -54,7 +56,33 @@ export class QuestionsAnswersController {
   @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'courseId', type: String })
   @ApiBody({ type: CreateQuestionsDto })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/file',
+        filename: (req, file, cb) => {
+          const fileName = uuidv4() + extname(file.originalname);
+          cb(null, fileName);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        const allowed = [
+          'application/pdf',
+          'application/zip',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/plain',
+        ];
+        if (!allowed.includes(file.mimetype)) {
+          return callback(
+            new UnsupportedMediaTypeException('Only PDF, DOCX, ZIP, XLSX, TXT types are allowed'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
   createQuestion(@Req() req: Request, @Param('courseId') courseId: string, @Body() body: CreateQuestionsDto, @UploadedFile() file: Express.Multer.File) {
     return this.service.create_question(req['user'].id, courseId, body, file);
   }
@@ -65,7 +93,34 @@ export class QuestionsAnswersController {
   @ApiOperation({ summary: 'Update question | STUDENT' })
   @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'id', type: Number })
-  @UseInterceptors(FileInterceptor('file')) updateQuestion(@Param('id', ParseIntPipe) id: number, @Body() body: CreateQuestionsDto, @UploadedFile() file: Express.Multer.File,) {
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/file',
+        filename: (req, file, cb) => {
+          const fileName = uuidv4() + extname(file.originalname);
+          cb(null, fileName);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        const allowed = [
+          'application/pdf',
+          'application/zip',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/plain',
+        ];
+        if (!allowed.includes(file.mimetype)) {
+          return callback(
+            new UnsupportedMediaTypeException('Only PDF, DOCX, ZIP, XLSX, TXT types are allowed'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  updateQuestion(@Param('id', ParseIntPipe) id: number, @Body() body: CreateQuestionsDto, @UploadedFile() file: Express.Multer.File,) {
     return this.service.update_question(id, body, file);
   }
 
@@ -75,16 +130,71 @@ export class QuestionsAnswersController {
   @ApiOperation({ summary: 'Create question answer | ASSISTANT | MENTOR' })
   @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'questionId', type: Number })
-  @UseInterceptors(FileInterceptor('file')) createAnswer(@Req() req: Request, @Param('questionId', ParseIntPipe) questionId: number, @Body() body: CreateQuestionAnswerDto, @UploadedFile() file: Express.Multer.File,) {
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/file',
+        filename: (req, file, cb) => {
+          const fileName = uuidv4() + extname(file.originalname);
+          cb(null, fileName);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        const allowed = [
+          'application/pdf',
+          'application/zip',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/plain',
+        ];
+        if (!allowed.includes(file.mimetype)) {
+          return callback(
+            new UnsupportedMediaTypeException('Only PDF, DOCX, ZIP, XLSX, TXT types are allowed'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  createAnswer(@Req() req: Request, @Param('questionId', ParseIntPipe) questionId: number, @Body() body: CreateQuestionAnswerDto, @UploadedFile() file: Express.Multer.File,) {
     return this.service.create_question_answer(req['user'].id, questionId, body, file);
   }
 
   @Patch('answer/:id')
   @Auth(UserRole.MENTOR, UserRole.ADMIN, UserRole.ASSISTANT)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update question answer | MENTOR | ADMIN | ASSISTANT'})
+  @ApiOperation({ summary: 'Update question answer | MENTOR | ADMIN | ASSISTANT' })
   @ApiConsumes('multipart/form-data')
-  @ApiParam({ name: 'id', type: Number }) @UseInterceptors(FileInterceptor('file')) updateAnswer(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateQuestionsAnswerDto, @UploadedFile() file: Express.Multer.File,) {
+  @ApiParam({ name: 'id', type: Number })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/file',
+        filename: (req, file, cb) => {
+          const fileName = uuidv4() + extname(file.originalname);
+          cb(null, fileName);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        const allowed = [
+          'application/pdf',
+          'application/zip',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/plain',
+        ];
+        if (!allowed.includes(file.mimetype)) {
+          return callback(
+            new UnsupportedMediaTypeException('Only PDF, DOCX, ZIP, XLSX, TXT types are allowed'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  updateAnswer(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateQuestionsAnswerDto, @UploadedFile() file: Express.Multer.File,) {
     return this.service.update(id, body, file);
   }
 

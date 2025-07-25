@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UnsupportedMediaTypeException, UploadedFile, Query, Req } from '@nestjs/common';
 import { HomeworksService } from './homeworks.service';
-import { CreateHomeworkDto } from './dto/create-homework.dto';
-import { UpdateHomeworkDto } from './dto/update-homework.dto';
+import { CreateHomeworkDto } from './interfaces/create-homework.dto';
+import { UpdateHomeworkDto } from './interfaces/update-homework.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { v4 as uuidv4 } from "uuid"
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { GetHomeworksQueryDto, GetSubmitsQueryDto } from './dto/query.dto';
-import { CheckDto, SubmissionDto } from './dto/submission.dto';
+import { GetHomeworksQueryDto, GetSubmitsQueryDto } from './interfaces/query.dto';
+import { CheckDto, SubmissionDto } from './interfaces/submission.dto';
 import { Auth } from 'src/core/decorators/decorators.service';
 import { UserRole } from '@prisma/client';
 @Controller('homeworks')
