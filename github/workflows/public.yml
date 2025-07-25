@@ -32,7 +32,7 @@ jobs:
 
             echo "Stopping containers"
             sudo /usr/bin/docker compose down
-
+            
             echo "Building containers"
             sudo /usr/bin/docker compose build
 
