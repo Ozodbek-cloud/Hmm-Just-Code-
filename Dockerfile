@@ -12,6 +12,7 @@ COPY . .
 EXPOSE 4077
 
 RUN npx prisma generate
+npx prisma migrate deploy
 RUN npm run build
 
 CMD ["npm", "run", "start:dev"]
