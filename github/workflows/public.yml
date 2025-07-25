@@ -1,3 +1,5 @@
+name: Deploy to VPS
+
 on:
   push:
     branches:
@@ -22,19 +24,22 @@ jobs:
             mkdir -p /home/ubuntu/examination
             cd /home/ubuntu/examination
 
-            if [ ! -d "Hmm-Just-Code-.git" ]; then
+            if [ ! -d "Hmm-Just-Code" ]; then
               echo "Cloning repository"
-              git clone https://github.com/Ozodbek-cloud/Hmm-Just-Code-.git
+              git clone https://github.com/Ozodbek-cloud/Hmm-Just-Code-.git Hmm-Just-Code
             else
-              echo "Pulling latest changes"
+              echo "Repository already exists, pulling latest changes"
+              cd Hmm-Just-Code
               git pull origin main
             fi
-            
+
+            cd /home/ubuntu/examination/Hmm-Just-Code
+
             echo "Stopping containers"
-            sudo /usr/bin/docker compose down
-            
+            sudo docker compose down
+
             echo "Building containers"
-            sudo /usr/bin/docker compose build
+            sudo docker compose build
 
             echo "Running containers"
-            sudo /usr/bin/docker compose up -d
+            sudo docker compose up -d

@@ -4,23 +4,23 @@ version: '3.8'
 services:
   db:
     image: postgres:16
-    container_name: postgres_db
+    container_name: my-exam
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
       POSTGRES_DB: examination_02
     ports:
-      - "5431:5432"
+      - "5433:5432"
     volumes:
       - data:/var/lib/postgresql/data
 
   app:
     build: .
-    container_name: my_app
+    container_name: my_exam
     restart: always
     ports:
-      - "4077:4077"
+      - "4077:3000"
     env_file:
       - .env
     depends_on:
