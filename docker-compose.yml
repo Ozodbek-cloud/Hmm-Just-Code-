@@ -1,8 +1,7 @@
-
 services:
   db:
     image: postgres:16
-    container_name: my-exam
+    container_name: exam-db
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -15,10 +14,10 @@ services:
 
   app:
     build: .
-    container_name: my_exam
+    container_name: exam-app
     restart: always
     ports:
-      - "4077:3000"
+      - "4077:4077"
     env_file:
       - .env
     depends_on:
@@ -32,4 +31,3 @@ services:
 
 volumes:
   data:
-
