@@ -154,7 +154,7 @@ export class LessonsService {
       throw new BadRequestException(error.message)
     }
   }
-
+  
   async remove(id: string) {
     try {
       let deleted = await this.prismaService.lesson.delete({
